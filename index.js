@@ -1,0 +1,1 @@
+const globalquran = require( "./src/main.js" );

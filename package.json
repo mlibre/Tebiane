@@ -1,0 +1,20 @@
+{
+  "name": "quran",
+  "version": "1.0.3",
+  "description": "fuzzy search in quran and it's translations (only persian for now)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.4.0",
+    "fuse.js": "^7.0.0",
+    "lodash": "^4.17.21",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
