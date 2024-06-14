@@ -8,6 +8,8 @@
 * Telegram Usernmae: @TebianeBot
 * Bot Name: Tebiane
 
+![Tebiane](./image.png)
+
 ## ویژگی‌ها
 
 * جستجوی دقیق و تقریبی (فازی) آیات
