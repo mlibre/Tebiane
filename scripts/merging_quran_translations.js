@@ -6,11 +6,11 @@ const json4 = require( "../sources/fa.mojtabavi.json" );
 const json5 = require( "../sources/en.arberry.json" );
 const json6 = require( "../sources/quran-simple-clean.json" );
 const json7 = require( "../sources/quran-simple-enhanced.json" );
-const allSurah = require( "../sources/surahs_names.json" );
+const surahsNames = require( "../sources/surahs_names.json" );
 
 function findSurahDetails ( surahNumber )
 {
-	return allSurah.find( surah => { return surah.num === surahNumber.toString() });
+	return surahsNames.find( surah => { return surah.num === surahNumber.toString() });
 }
 
 function mergeVersesToArray ( ...jsons )
