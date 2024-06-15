@@ -60,4 +60,9 @@ node src/main.js
 ```
 
 <!-- * **search** - هر چه دوست دارید بنویسید
-* **resources** - نمایش منابع -->
+* **resources** - نمایش منابع 
+* farsi.khamenei.ir
+* https://farsi.khamenei.ir/speech-quran?npt=7
+* tanzil.net
+* https://quran.makarem.ir/fa/interpretation?sura=1&verse=1
+* -->
