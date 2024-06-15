@@ -4,9 +4,9 @@ const json2 = require( "../sources/fa.ansarian.json" );
 const json3 = require( "../sources/fa.fooladvand.json" );
 const json4 = require( "../sources/fa.mojtabavi.json" );
 const json5 = require( "../sources/en.arberry.json" );
-const json6 = require( "../sources/quran-simple-clean.fixed.json" );
-const json7 = require( "../sources/quran-simple-enhanced.fixed.json" );
-const allSurah = require( "../sources/all_surah.json" );
+const json6 = require( "../sources/quran-simple-clean.json" );
+const json7 = require( "../sources/quran-simple-enhanced.json" );
+const allSurah = require( "../sources/surahs_names.json" );
 
 function findSurahDetails ( surahNumber )
 {

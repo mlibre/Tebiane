@@ -3,8 +3,7 @@
 const fs = require( "fs" );
 const cheerio = require( "cheerio" );
 
-const htmlString = fs.readFileSync( "./all_surah.html", "utf8" );
-
+const htmlString = fs.readFileSync( "./surahs_names.html", "utf8" );
 
 const $ = cheerio.load( htmlString );
 const data = [];
@@ -20,10 +19,10 @@ $( "tbody > tr" ).each( ( index, element ) =>
 	data.push( rowData );
 });
 
-const jsonData = JSON.stringify( data, null, 2 ); // Convert to JSON with pretty print
+const jsonData = JSON.stringify( data, null, 2 );
 
 // Write JSON data to a file
-fs.writeFile( "output.json", jsonData, ( err ) =>
+fs.writeFile( "surahs_names.json", jsonData, ( err ) =>
 {
 	if ( err ) throw err;
 	console.log( "Data written to file" );

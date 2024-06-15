@@ -3,8 +3,8 @@ fa.ansarian.json: https://api.globalquran.com/complete/fa.ansarian.json
 fa.fooladvand.json: https://api.globalquran.com/complete/fa.fooladvand.json
 fa.mojtabavi.json: https://api.globalquran.com/complete/fa.mojtabavi.json
 en.arberry.json: https://api.globalquran.com/complete/en.arberry.json
-quran-simple-clean.fixed.json: https://api.globalquran.com/complete/quran-simple-clean.json
-quran-simple-enhanced.fixed.json: https://api.globalquran.com/complete/quran-simple-enhanced.json
+quran-simple-clean.json: https://api.globalquran.com/complete/quran-simple-clean.json
+quran-simple-enhanced.json: https://api.globalquran.com/complete/quran-simple-enhanced.json
 
-all_surah.json: https://en.wikipedia.org/wiki/List_of_chapters_in_the_Quran
-all_surah.json: https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%D8%B3%D9%88%D8%B1%D9%87%E2%80%8C%D9%87%D8%A7%DB%8C_%D9%82%D8%B1%D8%A2%D9%86
+surahs_names.json: https://en.wikipedia.org/wiki/List_of_chapters_in_the_Quran
+surahs_names.json: https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%D8%B3%D9%88%D8%B1%D9%87%E2%80%8C%D9%87%D8%A7%DB%8C_%D9%82%D8%B1%D8%A2%D9%86
