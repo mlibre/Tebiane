@@ -23,7 +23,8 @@ if ( proxy )
 }
 
 const bot = new TelegramBot( token, botOptions );
-const fuseKeys = ["id", "surah.number", "surah.arabic", "surah.farsi", "ayah",
+const fuseKeys = ["id", "id_persian", "surah.number", "surah.number_persian",
+	"surah.arabic", "surah.farsi", "ayah", "ayah_persian",
 	"verse.farsi_makarem", "verse.farsi_ansarian", "verse.farsi_fooladvand",
 	"verse.farsi_mojtabavi", "verse.arabic_clean", "verse.arabic_enhanced"]
 const fuseIndex = Fuse.createIndex( fuseKeys, quran )

@@ -41,6 +41,10 @@ npm install
 
 فایل `.env.example` رو به نام `.env` تغییر دهید:
 
+```bash
+mv .env.example .env
+```
+
 برنامه هنگام شروع شدن این فایل رو میخونه و توکن ربات شما و تنظیمات پروکسی رو برای اجرای ربات استفاده میکنه. نمونه محتویات این فایل به این شکله:
 
 ```env
@@ -58,11 +62,3 @@ npm start
 # یا به صورت مستقیم فایل اصلی رو اجرا کنید
 node src/main.js
 ```
-
-<!-- * **search** - هر چه دوست دارید بنویسید
-* **resources** - نمایش منابع 
-* farsi.khamenei.ir
-* https://farsi.khamenei.ir/speech-quran?npt=7
-* tanzil.net
-* https://quran.makarem.ir/fa/interpretation?sura=1&verse=1
-* -->
