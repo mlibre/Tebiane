@@ -72,42 +72,25 @@ bot.on( "callback_query", async ( callbackQuery ) =>
 // quran
 // [
 // 	{
-// 		"id": 1,
-// 		"surah": {
-// 			"number": 1,
-// 			"arabic": "ٱلْفَاتِحَة",
-// 			"english": "Al-Fatihah",
-// 			"farsi": "فاتحه"
-// 		},
-// 		"ayah": 1,
-// 		"verse": {
-// 			"farsi_makarem": "به نام خداوند بخشنده بخشایشگر",
-// 			"farsi_ansarian": "به نام خدا که رحمتش بی‌اندازه است و مهربانی‌اش همیشگی.",
-// 			"farsi_fooladvand": "به نام خداوند رحمتگر مهربان",
-// 			"farsi_mojtabavi": "به نام خداى بخشاينده مهربان",
-// 			"english_arberry": "In the Name of God, the Merciful, the Compassionate",
-// 			"arabic_clean": "بسم الله الرحمن الرحيم",
-// 			"arabic_enhanced": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
-// 		}
-// 	},
-// 	{
-// 		"id": 2,
-// 		"surah": {
-// 			"number": 1,
-// 			"arabic": "ٱلْفَاتِحَة",
-// 			"english": "Al-Fatihah",
-// 			"farsi": "فاتحه"
-// 		},
-// 		"ayah": 2,
-// 		"verse": {
-// 			"farsi_makarem": "ستایش مخصوص خداوندی است که پروردگار جهانیان است.",
-// 			"farsi_ansarian": "همه ستایش ها، ویژه خدا، مالک و مربّی جهانیان است.",
-// 			"farsi_fooladvand": "ستايش خدايى را كه پروردگار جهانيان،",
-// 			"farsi_mojtabavi": "سپاس و ستايش خداى راست، پروردگار جهانيان",
-// 			"english_arberry": "Praise belongs to God, the Lord of all Being,",
-// 			"arabic_clean": "الحمد لله رب العالمين",
-// 			"arabic_enhanced": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"
-// 		}
-// 	},
-// 	AND SO ON ...
-// ]
+//     "id": 1,
+//     "id_persian": "۱",
+//     "surah": {
+//       "number": 1,
+//       "persian_number": "۱",
+//       "arabic": "ٱلْفَاتِحَة",
+//       "english": "Al-Fatihah",
+//       "farsi": "فاتحه"
+//     },
+//     "ayah": 1,
+//     "ayah_persian": "۱",
+//     "verse": {
+//       "farsi_makarem": "به نام خداوند بخشنده بخشایشگر",
+//       "farsi_ansarian": "به نام خدا که رحمتش بی‌اندازه است و مهربانی‌اش همیشگی.",
+//       "farsi_fooladvand": "به نام خداوند رحمتگر مهربان",
+//       "farsi_mojtabavi": "به نام خداى بخشاينده مهربان",
+//       "english_arberry": "In the Name of God, the Merciful, the Compassionate",
+//       "arabic_clean": "بسم الله الرحمن الرحيم",
+//       "arabic_enhanced": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+//     }
+//   },
+//   ...
