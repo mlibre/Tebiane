@@ -60,7 +60,7 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 	{
 		throw new Error( `Invalid translation code: ${transaltionCode}` );
 	}
-	let message = `> ${currentSurahTitle} - ${translator.farsi} - ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
+	let message = `> ${currentSurahTitle} 🕊️ ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
 		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber - 1 )}\n` : ""}
 		${currentAyah.verse[translator.key]} ۝ ${currentAyahPersianNumber}\n
 		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber + 1 )}` : ""}`;
