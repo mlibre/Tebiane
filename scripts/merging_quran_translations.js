@@ -51,7 +51,7 @@ function mergeVersesToArray ( ...jsons )
 						id_persian: toPersian( id ),
 						surah: {
 							number: verse.surah,
-							number_persian: toPersian( verse.surah ),
+							persian_number: toPersian( verse.surah ),
 							arabic: surahDetails.arabicTitle,
 							english: surahDetails.englishTitle,
 							farsi: surahDetails.farsiTitle

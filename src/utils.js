@@ -38,7 +38,9 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 {
 	const currentSurahTitle = quran[refIndex].surah.arabic;
 	const currentSurahNumber = quran[refIndex].surah.number;
+	const currentSurahPersianNumber = quran[refIndex].surah.persian_number;
 	const currentAyahNumber = quran[refIndex].ayah;
+	const currentAyahPersianNumber = quran[refIndex].ayah_persian;
 
 	let prevAyah = null;
 	if ( refIndex - 1 >= 0 && quran[refIndex - 1].surah.number === currentSurahNumber )
@@ -58,16 +60,17 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 	{
 		throw new Error( `Invalid translation code: ${transaltionCode}` );
 	}
-	let message = `> ${currentSurahTitle} - ${translator.farsi} - ${currentSurahNumber}:${currentAyahNumber}\n\n${
-		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${currentAyahNumber - 1}\n\n` : ""
-	}${currentAyah.verse[translator.key]} ۝ ${currentAyahNumber}\n\n${
-		nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${currentAyahNumber + 1}` : ""}`;
+	let message = `> ${currentSurahTitle} - ${translator.farsi} - ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
+		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber - 1 )}\n` : ""}
+		${currentAyah.verse[translator.key]} ۝ ${currentAyahPersianNumber}\n
+		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber + 1 )}` : ""}`;
 
 	message = message.replace( /!/g, "\\!" ).replace( /\./g, "\\." )
 	.replace( /-/g, "\\-" ).replace( /\(/g, "\\(" ).replace( /\)/g, "\\)" )
 	.replace( /\]/g, "\\]" ).replace( /\[/g, "\\[" ).replace( /_/g, "\\_" )
 	.replace( /\*/g, "\\*" ).replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
 	.replace( /\=/g, "\\=" );
+
 	return message;
 }
 
@@ -98,10 +101,10 @@ exports.editMessageWithRetry = async function editMessageWithRetry ( bot, messag
 		}
 		catch ( error )
 		{
-			if ( error.message.includes( "socket hang up" ) || error.message.includes( "network socket disconnected" ) )
+			if ( isNetworkError( error ) )
 			{
 				console.log( `Retrying due to socket hang up... Attempts left: ${retries - i - 1}` );
-				await new Promise( resolve => { return setTimeout( resolve, 100 ) });
+				await sleep( 100 )
 			}
 			else
 			{
@@ -122,10 +125,10 @@ exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId
 		}
 		catch ( error )
 		{
-			if ( error.message.includes( "socket hang up" ) || error.message.includes( "network socket disconnected" ) )
+			if ( isNetworkError( error ) )
 			{
 				console.log( `Retrying due to socket hang up... Attempts left: ${retries - i - 1}` );
-				await new Promise( resolve => { return setTimeout( resolve, 100 ) });
+				await sleep( 100 )
 			}
 			else
 			{
@@ -138,16 +141,45 @@ exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId
 exports.parseCallbackData = function parseCallbackData ( input )
 {
 	const action = input[0];
-	const [verseRefIndex, refIndexesStr] = input.slice( 1 ).split( "_" );
+	const [verseRefIndexStr, refIndexesStr] = input.slice( 1 ).split( "_" );
 	let refIndex = -1;
 	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
 	{
-		const intValue = parseInt( num.replace( "@", "" ), 10 );
+		const tmp = parseInt( num.replace( "@", "" ), 10 );
 		if ( num.includes( "@" ) )
 		{
-			refIndex = intValue;
+			refIndex = tmp;
 		}
-		return intValue;
+		return tmp;
 	});
-	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndex ) };
+	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+}
+
+isNetworkError = function isNetworkError ( error )
+{
+	return error.message.includes( "socket hang up" ) || error.message.includes( "network socket disconnected" );
+}
+
+async function sleep ( time )
+{
+	await new Promise( resolve => { return setTimeout( resolve, time ) });
+}
+
+const persian_numbers_map = {
+	"0": "۰",
+	"1": "۱",
+	"2": "۲",
+	"3": "۳",
+	"4": "۴",
+	"5": "۵",
+	"6": "۶",
+	"7": "۷",
+	"8": "۸",
+	"9": "۹"
+}
+
+function toPersian ( number )
+{
+	const chars = number.toString().split( "" ).map( char => { return persian_numbers_map[char] });
+	return chars.join( "" );
 }

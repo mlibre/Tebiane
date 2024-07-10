@@ -11,7 +11,7 @@ module.exports = async function callback_query ( bot, data, chatId, messageId )
 	}
 	let { action, refIndexes, refIndex, verseRefIndex } = parseCallbackData( data );
 
-	if ( all_translations[action] )
+	if ( all_translations[action] ) // translation
 	{
 		const message = generateMessage( verseRefIndex, action );
 		await editMessageWithRetry( bot, message, {
