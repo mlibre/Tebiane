@@ -50,8 +50,9 @@ const fuseIndex = Fuse.createIndex( fuseKeys, quran )
 
 const fuse = new Fuse( quran, {
 	isCaseSensitive: false,
-	includeScore: true,
-	includeMatches: true,
+	includeScore: false,
+	includeMatches: false,
+	useExtendedSearch: false,
 	threshold: 0.5,
 	keys: fuseKeys
 }, fuseIndex );
