@@ -23,10 +23,29 @@ if ( proxy )
 }
 
 const bot = new TelegramBot( token, botOptions );
-const fuseKeys = ["surah.number", "surah.persian_number",
-	"surah.arabic", "surah.farsi", "ayah", "ayah_persian",
-	"verse.farsi_makarem", "verse.farsi_ansarian", "verse.farsi_fooladvand",
-	"verse.farsi_mojtabavi", "verse.arabic_clean", "verse.arabic_enhanced"] // "id", "id_persian",]
+// const fuseKeys = ["surah.number", "surah.persian_number",
+// 	"surah.arabic", "surah.farsi", "ayah", "ayah_persian",
+// 	"verse.farsi_makarem", "verse.farsi_ansarian", "verse.farsi_fooladvand",
+// 	"verse.farsi_mojtabavi", "verse.arabic_clean", "verse.arabic_enhanced", "id", "id_persian"]
+
+const fuseKeys = [
+	{ name: "surah.number", weight: 1 },
+	{ name: "surah.persian_number", weight: 1 },
+	{ name: "surah.arabic", weight: 1 },
+	{ name: "surah.farsi", weight: 1 },
+	{ name: "ayah", weight: 1 },
+	{ name: "ayah_persian", weight: 1 },
+	{ name: "verse.farsi_makarem", weight: 1 },
+	{ name: "verse.farsi_ansarian", weight: 1 },
+	{ name: "verse.farsi_fooladvand", weight: 1 },
+	{ name: "verse.farsi_mojtabavi", weight: 1 },
+	{ name: "verse.arabic_clean", weight: 1 },
+	{ name: "verse.arabic_enhanced", weight: 1 },
+	{ name: "id", weight: 0.05 },
+	{ name: "id_persian", weight: 0.05 },
+];
+
+
 const fuseIndex = Fuse.createIndex( fuseKeys, quran )
 
 const fuse = new Fuse( quran, {

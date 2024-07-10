@@ -79,7 +79,7 @@ exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
 	const refIndexesStr = refIndexes.map( index => { return index === refIndex ? `@${index}` : index }).join( "," );
 	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`;
 	const buttons = [
-		[{ text: "⬅️", callback_data: `a${verseAndRef}` }, { text: "➡️", callback_data: `b${verseAndRef}` }],
+		[{ text: "نتیجه بعد ⬅️", callback_data: `a${verseAndRef}` }, { text: "➡️ نتیجه قبل", callback_data: `b${verseAndRef}` }],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
 		[{
 			text: "عربی",
