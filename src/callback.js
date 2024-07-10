@@ -2,14 +2,14 @@ const { generateMessage, buttons, parseCallbackData,
 	editMessageWithRetry, all_translations } = require( "./utils" );
 const quran = require( "../sources/quran.json" );
 
-module.exports = async function callback_query ( bot, data, chatId, messageId )
+module.exports = async function callback_query ( bot, input, chatId, messageId )
 {
 	const messageOptions = {
 		chat_id: chatId,
 		message_id: messageId,
 		parse_mode: "MarkdownV2"
 	}
-	let { action, refIndexes, refIndex, verseRefIndex } = parseCallbackData( data );
+	let { action, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
 
 	if ( all_translations[action] ) // translation
 	{
