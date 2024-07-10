@@ -1,10 +1,10 @@
-fa.makarem.json: https://api.globalquran.com/complete/fa.makarem.json
-fa.ansarian.json: https://api.globalquran.com/complete/fa.ansarian.json
-fa.fooladvand.json: https://api.globalquran.com/complete/fa.fooladvand.json
-fa.mojtabavi.json: https://api.globalquran.com/complete/fa.mojtabavi.json
-en.arberry.json: https://api.globalquran.com/complete/en.arberry.json
-ar-simple-clean.json: https://api.globalquran.com/complete/ar-simple-clean.json
-ar-simple-enhanced.json: https://api.globalquran.com/complete/ar-simple-enhanced.json
+ترجمه ی مکارم شیراری - fa.makarem.json: https://api.globalquran.com/complete/fa.makarem.json
+ترجمه انصاریان - fa.ansarian.json: https://api.globalquran.com/complete/fa.ansarian.json
+ترجمه فولادوند - fa.fooladvand.json: https://api.globalquran.com/complete/fa.fooladvand.json
+ترجمه ی مجتبوی - fa.mojtabavi.json: https://api.globalquran.com/complete/fa.mojtabavi.json
+ترجمه اربری - en.arberry.json: https://api.globalquran.com/complete/en.arberry.json
+متن عربی ساده - ar-simple-clean.json: https://api.globalquran.com/complete/ar-simple-clean.json
+متن عربی با عراب - ar-simple-enhanced.json: https://api.globalquran.com/complete/ar-simple-enhanced.json
 
-surahs_names.json: https://en.wikipedia.org/wiki/List_of_chapters_in_the_Quran
-surahs_names.json: https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%D8%B3%D9%88%D8%B1%D9%87%E2%80%8C%D9%87%D8%A7%DB%8C_%D9%82%D8%B1%D8%A2%D9%86
+نام سوره ها به انگلیسی - surahs_names.json: https://en.wikipedia.org/wiki/List_of_chapters_in_the_Quran
+نام سوره ها به فارسی - surahs_names.json: https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%D8%B3%D9%88%D8%B1%D9%87%E2%80%8C%D9%87%D8%A7%DB%8C_%D9%82%D8%B1%D8%A2%D9%86
