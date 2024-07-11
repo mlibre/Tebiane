@@ -78,18 +78,8 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	const response = await axios.get( url, { responseType: "text/html" });
 	let htmlString = response.data;
 	htmlString = htmlString.replace( /\s+/g, " " ).trim();
-
-	// const dom = new JSDOM( htmlString );
-	// const { body } = dom.window.document;
-	// const paragraphs = Array.from( body.querySelectorAll( ".interpretation-text p" ) );
-	// استفاهد ازمنابع وب سایت با ذکرز منبع بلا مانع است
-	// paragraphs.forEach( p =>
-	// {
-	// 	const text = p.textContent.trim();
-	// 	console.log( text );
-	// });
-
 	const $ = cheerio.load( htmlString );
+
 	const translationTexts = [];
 	$( ".interpretation-text" ).each( ( index, element ) =>
 	{
@@ -104,15 +94,6 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 		});
 	});
 	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
-
-	// $( ".interpretation-text p" ).each( ( index, element ) =>
-	// {
-	// 	const text = $( element ).text().trim();
-	// 	if ( text )
-	// 	{
-	// 		translationTexts.push( normalizeMessage( text ) );
-	// 	}
-	// });
 	return translationTexts.join( "\n\n" );
 }
 
