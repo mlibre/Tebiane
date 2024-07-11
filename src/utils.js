@@ -38,11 +38,8 @@ exports.all_translations = all_translations;
 
 exports.generateMessage = function generateMessage ( refIndex, transaltionCode = "f" )
 {
-	const currentSurahTitle = quran[refIndex].surah.arabic;
-	const currentSurahNumber = quran[refIndex].surah.number;
-	const currentSurahPersianNumber = quran[refIndex].surah.persian_number;
-	const currentAyahNumber = quran[refIndex].ayah;
-	const currentAyahPersianNumber = quran[refIndex].ayah_persian;
+	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
+		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( refIndex );
 
 	let prevAyah = null;
 	if ( refIndex - 1 >= 0 && quran[refIndex - 1].surah.number === currentSurahNumber )
@@ -62,7 +59,7 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 	{
 		throw new Error( `Invalid translation code: ${transaltionCode}` );
 	}
-	let message = `> ${currentSurahTitle} 🕊️ ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
+	let message = `> ${currentSurahTitle} 🕊️ ترجمه ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
 		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber - 1 )}\n` : ""}
 		${currentAyah.verse[translator.key]} ۝ ${currentAyahPersianNumber}\n
 		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber + 1 )}` : ""}`;
@@ -71,9 +68,12 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 	return message;
 }
 
-exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( surahNumber, verseRefIndex )
+exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex )
 {
-	const url = `https://quran.makarem.ir/fa/interpretation?sura=${surahNumber}&verse=${verseRefIndex}`;
+	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
+		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+
+	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 
 	const response = await axios.get( url, { responseType: "text/html" });
 	let htmlString = response.data;
@@ -81,18 +81,23 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	const $ = cheerio.load( htmlString );
 
 	const translationTexts = [];
+	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نور 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
 	$( ".interpretation-text" ).each( ( index, element ) =>
 	{
 		const firstH3 = $( element ).find( "h3:first" );
-		const test = `> ${firstH3.text()}`;
-		translationTexts.push( normalizeMessage( test ) );
+		headerTest += firstH3.text();
+		translationTexts.push( normalizeMessage( headerTest ) );
 		const psAfterFirstH3 = firstH3.nextAll( "p" );
 		psAfterFirstH3.each( ( index, element ) =>
 		{
-			const text = $( element ).text()
-			translationTexts.push( normalizeMessage( text ) );
+			const tafsirText = $( element ).text()
+			translationTexts.push( normalizeMessage( tafsirText ) );
 		});
 	});
+	if ( translationTexts.length === 1 )
+	{
+		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
+	}
 	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
 	return translationTexts.join( "\n\n" );
 }
@@ -177,6 +182,16 @@ exports.parseCallbackData = function parseCallbackData ( input )
 		return tmp;
 	});
 	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+}
+
+function extractInfoByRefIndex ( refIndex )
+{
+	const currentSurahTitle = quran[refIndex].surah.arabic;
+	const currentSurahNumber = quran[refIndex].surah.number;
+	const currentSurahPersianNumber = quran[refIndex].surah.persian_number;
+	const currentAyahNumber = quran[refIndex].ayah;
+	const currentAyahPersianNumber = quran[refIndex].ayah_persian;
+	return { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber, currentAyahNumber, currentAyahPersianNumber };
 }
 
 function normalizeMessage ( message )

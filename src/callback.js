@@ -82,9 +82,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 	}
 	else if ( action === "k" ) // tafsir nemuneh
 	{
-		const surahNumber = quran[refIndex].surah.number;
-		const verseNumber = quran[refIndex].ayah;
-		const message = await generateTafsirNemunehMessage( surahNumber, verseNumber );
+		const message = await generateTafsirNemunehMessage( verseRefIndex );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
