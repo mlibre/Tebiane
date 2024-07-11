@@ -1,5 +1,6 @@
 const { generateMessage, buttons, parseCallbackData,
-	editMessageWithRetry, all_translations } = require( "./utils" );
+	editMessageWithRetry, all_translations,
+	generateTafsirNemunehMessage } = require( "./utils" );
 const quran = require( "../sources/quran.json" );
 
 module.exports = async function callback_query ( bot, input, chatId, messageId )
@@ -76,6 +77,18 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 			...messageOptions,
 			reply_markup: {
 				inline_keyboard: buttons( refIndex, refIndex, refIndexes )
+			},
+		})
+	}
+	else if ( action === "k" ) // tafsir nemuneh
+	{
+		const surahNumber = quran[refIndex].surah.number;
+		const verseNumber = quran[refIndex].ayah;
+		const message = await generateTafsirNemunehMessage( surahNumber, verseNumber );
+		await editMessageWithRetry( bot, message, {
+			...messageOptions,
+			reply_markup: {
+				inline_keyboard: buttons( verseRefIndex, refIndex, refIndexes )
 			},
 		})
 	}

@@ -1,4 +1,6 @@
 const quran = require( "../sources/quran.json" );
+const axios = require( "axios" );
+const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
 
 const perian_translations = {
@@ -65,13 +67,53 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 		${currentAyah.verse[translator.key]} ۝ ${currentAyahPersianNumber}\n
 		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber + 1 )}` : ""}`;
 
-	message = message.replace( /!/g, "\\!" ).replace( /\./g, "\\." )
-	.replace( /-/g, "\\-" ).replace( /\(/g, "\\(" ).replace( /\)/g, "\\)" )
-	.replace( /\]/g, "\\]" ).replace( /\[/g, "\\[" ).replace( /_/g, "\\_" )
-	.replace( /\*/g, "\\*" ).replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
-	.replace( /\=/g, "\\=" );
-
+	message = normalizeMessage( message );
 	return message;
+}
+
+exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( surahNumber, verseRefIndex )
+{
+	const url = `https://quran.makarem.ir/fa/interpretation?sura=${surahNumber}&verse=${verseRefIndex}`;
+
+	const response = await axios.get( url, { responseType: "text/html" });
+	let htmlString = response.data;
+	htmlString = htmlString.replace( /\s+/g, " " ).trim();
+
+	// const dom = new JSDOM( htmlString );
+	// const { body } = dom.window.document;
+	// const paragraphs = Array.from( body.querySelectorAll( ".interpretation-text p" ) );
+	// استفاهد ازمنابع وب سایت با ذکرز منبع بلا مانع است
+	// paragraphs.forEach( p =>
+	// {
+	// 	const text = p.textContent.trim();
+	// 	console.log( text );
+	// });
+
+	const $ = cheerio.load( htmlString );
+	const translationTexts = [];
+	$( ".interpretation-text" ).each( ( index, element ) =>
+	{
+		const firstH3 = $( element ).find( "h3:first" );
+		const test = `> ${firstH3.text()}`;
+		translationTexts.push( normalizeMessage( test ) );
+		const psAfterFirstH3 = firstH3.nextAll( "p" );
+		psAfterFirstH3.each( ( index, element ) =>
+		{
+			const text = $( element ).text()
+			translationTexts.push( normalizeMessage( text ) );
+		});
+	});
+	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
+
+	// $( ".interpretation-text p" ).each( ( index, element ) =>
+	// {
+	// 	const text = $( element ).text().trim();
+	// 	if ( text )
+	// 	{
+	// 		translationTexts.push( normalizeMessage( text ) );
+	// 	}
+	// });
+	return translationTexts.join( "\n\n" );
 }
 
 exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
@@ -85,7 +127,8 @@ exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
 			text: "عربی",
 			callback_data: `h${verseAndRef}`,
 		}],
-		[{ text: "آیه ی بعد", callback_data: `i${verseAndRef}` }, { text: "آیه ی قبل", callback_data: `j${verseAndRef}` }]
+		[{ text: "آیه ی بعد", callback_data: `i${verseAndRef}` }, { text: "آیه ی قبل", callback_data: `j${verseAndRef}` }],
+		[{ text: "تفسیر نمونه", callback_data: `k${verseAndRef}` }]
 	];
 	return buttons;
 }
@@ -153,6 +196,15 @@ exports.parseCallbackData = function parseCallbackData ( input )
 		return tmp;
 	});
 	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+}
+
+function normalizeMessage ( message )
+{
+	return message.replace( /!/g, "\\!" ).replace( /\./g, "\\." )
+	.replace( /-/g, "\\-" ).replace( /\(/g, "\\(" ).replace( /\)/g, "\\)" )
+	.replace( /\]/g, "\\]" ).replace( /\[/g, "\\[" ).replace( /_/g, "\\_" )
+	.replace( /\*/g, "\\*" ).replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
+	.replace( /\=/g, "\\=" );
 }
 
 isNetworkError = function isNetworkError ( error )
