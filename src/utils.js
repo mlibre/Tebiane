@@ -85,7 +85,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	$( ".interpretation-text" ).each( ( index, element ) =>
 	{
 		const firstH3 = $( element ).find( "h3:first" );
-		headerTest += firstH3.text();
+		headerTest += `\n\n 📝 ${ firstH3.text()}`;
 		translationTexts.push( normalizeMessage( headerTest ) );
 		const psAfterFirstH3 = firstH3.nextAll( "p" );
 		psAfterFirstH3.each( ( index, element ) =>
@@ -199,7 +199,9 @@ function normalizeMessage ( message )
 	return message.replace( /!/g, "\\!" ).replace( /\./g, "\\." )
 	.replace( /-/g, "\\-" ).replace( /\(/g, "\\(" ).replace( /\)/g, "\\)" )
 	.replace( /\]/g, "\\]" ).replace( /\[/g, "\\[" ).replace( /_/g, "\\_" )
-	.replace( /\*/g, "\\*" ).replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
+	.replace( /\*/g, "\\*" ) // commenting this will cause problem if message contains opening start but not closed like: *something
+	// message must be like this in MarkdownV2 format: *something*
+	.replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
 	.replace( /\=/g, "\\=" );
 }
 
