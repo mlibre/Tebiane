@@ -85,7 +85,10 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	$( ".interpretation-text" ).each( ( index, element ) =>
 	{
 		const firstH3 = $( element ).find( "h3:first" );
-		headerTest += `\n\n 📝 ${ firstH3.text()}`;
+		if ( firstH3.text() != "" )
+		{
+			headerTest += `\n\n 📝 ${ firstH3.text()}`;
+		}
 		translationTexts.push( normalizeMessage( headerTest ) );
 		const psAfterFirstH3 = firstH3.nextAll( "p" );
 		psAfterFirstH3.each( ( index, element ) =>
@@ -94,7 +97,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 			translationTexts.push( normalizeMessage( tafsirText ) );
 		});
 	});
-	if ( translationTexts.length === 1 )
+	if ( translationTexts.length <= 1 )
 	{
 		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
 	}
