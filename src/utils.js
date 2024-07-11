@@ -81,7 +81,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	const $ = cheerio.load( htmlString );
 
 	const translationTexts = [];
-	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نور 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
+	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
 	$( ".interpretation-text" ).each( ( index, element ) =>
 	{
 		const firstH3 = $( element ).find( "h3:first" );
