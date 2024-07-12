@@ -81,9 +81,12 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	const $ = cheerio.load( htmlString );
 
 	const translationTexts = [];
+	let currentMessageLength = 0;
+	let limitReached = false;
 	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
 	$( ".interpretation-text" ).each( ( index, element ) =>
 	{
+		if ( limitReached ) return;
 		const firstH3 = $( element ).find( "h3:first" );
 		if ( firstH3.text() != "" )
 		{
@@ -93,8 +96,19 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 		const psAfterFirstH3 = firstH3.nextAll( "p" );
 		psAfterFirstH3.each( ( index, element ) =>
 		{
+			if ( limitReached ) return;
 			const tafsirText = $( element ).text()
-			translationTexts.push( normalizeMessage( tafsirText ) );
+			if ( canAddToMessage( currentMessageLength, tafsirText ) )
+			{
+				translationTexts.push( normalizeMessage( tafsirText ) );
+				currentMessageLength += tafsirText.length;
+
+			}
+			else
+			{
+				limitReached = true;
+				return false;
+			}
 		});
 	});
 	if ( translationTexts.length <= 1 )
@@ -105,6 +119,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	const result = translationTexts.join( "\n\n" );
 	return result;
 }
+
 
 exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
 {
@@ -196,6 +211,12 @@ function extractInfoByRefIndex ( refIndex )
 	const currentAyahNumber = quran[refIndex].ayah;
 	const currentAyahPersianNumber = quran[refIndex].ayah_persian;
 	return { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber, currentAyahNumber, currentAyahPersianNumber };
+}
+
+function canAddToMessage ( currentLength, newText )
+{
+	const maxLength = 3000; // Telegram message character limit
+	return currentLength + newText.length <= maxLength;
 }
 
 function normalizeMessage ( message )
