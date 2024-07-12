@@ -3,49 +3,7 @@ const axios = require( "axios" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
 
-const actionCodes = {
-	nextVerse: "i",
-	prevVerse: "j",
-	tafsirNemooneh: "k",
-	arabicText: "g",
-	arabicIrabText: "h",
-	nextResult: "a",
-	prevResult: "b"
-};
-
-const perian_translations = {
-	"c": {
-		farsi: "انصاریان",
-		key: "farsi_ansarian"
-	},
-	"d": {
-		farsi: "فولادوند",
-		key: "farsi_fooladvand"
-	},
-	"e": {
-		farsi: "مجتبوی",
-		key: "farsi_mojtabavi"
-	},
-	"f": {
-		farsi: "مکارم شیرازی",
-		key: "farsi_makarem"
-	}
-};
-
-const arabic_texts = {
-	[actionCodes.arabicText]: {
-		farsi: "عربی ساده",
-		key: "arabic_clean"
-	},
-	[actionCodes.arabicIrabText]: {
-		farsi: "عربی با اعراب",
-		key: "arabic_enhanced"
-	}
-}
-
-
-const all_translations = { ...perian_translations, ...arabic_texts };
-exports.all_translations = all_translations;
+const { all_translations, perian_translations, actionCodes } = require( "./configs" )
 
 exports.generateMessage = function generateMessage ( refIndex, transaltionCode = "f" )
 {
@@ -169,7 +127,7 @@ exports.editMessageWithRetry = async function editMessageWithRetry ( bot, messag
 			if ( isNetworkError( error ) )
 			{
 				console.log( `Retrying due to socket hang up... Attempts left: ${retries - i - 1}` );
-				await sleep( 100 )
+				await sleep( 50 )
 			}
 			else
 			{
@@ -193,7 +151,7 @@ exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId
 			if ( isNetworkError( error ) )
 			{
 				console.log( `Retrying due to socket hang up... Attempts left: ${retries - i - 1}` );
-				await sleep( 100 )
+				await sleep( 50 )
 			}
 			else
 			{

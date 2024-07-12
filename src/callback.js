@@ -1,7 +1,11 @@
-const { generateMessage, buttons, parseCallbackData,
-	editMessageWithRetry, all_translations,
-	generateTafsirNemunehMessage } = require( "./utils" );
 const quran = require( "../sources/quran.json" );
+const {
+	generateMessage,
+	buttons,
+	parseCallbackData,
+	editMessageWithRetry,
+	generateTafsirNemunehMessage } = require( "./utils" );
+const { all_translations, actionCodes } = require( "./configs" )
 
 module.exports = async function callback_query ( bot, input, chatId, messageId )
 {
