@@ -162,23 +162,6 @@ exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId
 	}
 }
 
-exports.parseCallbackData = function parseCallbackData ( input )
-{
-	const action = input[0];
-	const [verseRefIndexStr, refIndexesStr] = input.slice( 1 ).split( "_" );
-	let refIndex = -1;
-	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
-	{
-		const tmp = parseInt( num.replace( "@", "" ), 10 );
-		if ( num.includes( "@" ) )
-		{
-			refIndex = tmp;
-		}
-		return tmp;
-	});
-	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
-}
-
 function extractInfoByRefIndex ( refIndex )
 {
 	const currentSurahTitle = quran[refIndex].surah.arabic;

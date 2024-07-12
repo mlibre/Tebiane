@@ -2,7 +2,6 @@ const quran = require( "../sources/quran.json" );
 const {
 	generateMessage,
 	buttons,
-	parseCallbackData,
 	editMessageWithRetry,
 	generateTafsirNemunehMessage } = require( "./utils" );
 const { all_translations, actionCodes } = require( "./configs" )
@@ -98,4 +97,21 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 	{
 		throw new Error( "Invalid callback data" );
 	}
+}
+
+function parseCallbackData ( input )
+{
+	const action = input[0];
+	const [verseRefIndexStr, refIndexesStr] = input.slice( 1 ).split( "_" );
+	let refIndex = -1;
+	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
+	{
+		const tmp = parseInt( num.replace( "@", "" ), 10 );
+		if ( num.includes( "@" ) )
+		{
+			refIndex = tmp;
+		}
+		return tmp;
+	});
+	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
 }
