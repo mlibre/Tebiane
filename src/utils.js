@@ -3,6 +3,16 @@ const axios = require( "axios" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
 
+const actionCodes = {
+	nextVerse: "i",
+	prevVerse: "j",
+	tafsirNemooneh: "k",
+	arabicText: "g",
+	arabicIrabText: "h",
+	nextResult: "a",
+	prevResult: "b"
+};
+
 const perian_translations = {
 	"c": {
 		farsi: "انصاریان",
@@ -23,15 +33,16 @@ const perian_translations = {
 };
 
 const arabic_texts = {
-	"g": {
+	[actionCodes.arabicText]: {
 		farsi: "عربی ساده",
 		key: "arabic_clean"
 	},
-	"h": {
+	[actionCodes.arabicIrabText]: {
 		farsi: "عربی با اعراب",
 		key: "arabic_enhanced"
 	}
 }
+
 
 const all_translations = { ...perian_translations, ...arabic_texts };
 exports.all_translations = all_translations;
@@ -126,14 +137,20 @@ exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
 	const refIndexesStr = refIndexes.map( index => { return index === refIndex ? `@${index}` : index }).join( "," );
 	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`;
 	const buttons = [
-		[{ text: "آیه ی بعد", callback_data: `i${verseAndRef}` }, { text: "آیه ی قبل", callback_data: `j${verseAndRef}` }],
+		[
+			{ text: "آیه ی بعد", callback_data: `${actionCodes.nextVerse}${verseAndRef}` },
+			{ text: "آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verseAndRef}` }
+		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
-		[{ text: "تفسیر نمونه", callback_data: `k${verseAndRef}` }],
+		[{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh}${verseAndRef}` }],
 		[{
 			text: "متن عربی(سایر)",
-			callback_data: `h${verseAndRef}`,
+			callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
 		}],
-		[{ text: "نتیجه بعد ⬅️", callback_data: `a${verseAndRef}` }, { text: "➡️ نتیجه قبل", callback_data: `b${verseAndRef}` }]
+		[
+			{ text: "نتیجه بعد ⬅️", callback_data: `${actionCodes.nextResult}${verseAndRef}` },
+			{ text: "➡️ نتیجه قبل", callback_data: `${actionCodes.prevResult}${verseAndRef}` }
+		]
 	];
 	return buttons;
 }
