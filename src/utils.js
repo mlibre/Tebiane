@@ -102,7 +102,8 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
 	}
 	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
-	return translationTexts.join( "\n\n" );
+	const result = translationTexts.join( "\n\n" );
+	return result;
 }
 
 exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
