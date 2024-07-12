@@ -110,14 +110,14 @@ exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
 	const refIndexesStr = refIndexes.map( index => { return index === refIndex ? `@${index}` : index }).join( "," );
 	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`;
 	const buttons = [
-		[{ text: "نتیجه بعد ⬅️", callback_data: `a${verseAndRef}` }, { text: "➡️ نتیجه قبل", callback_data: `b${verseAndRef}` }],
+		[{ text: "آیه ی بعد", callback_data: `i${verseAndRef}` }, { text: "آیه ی قبل", callback_data: `j${verseAndRef}` }],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
+		[{ text: "تفسیر نمونه", callback_data: `k${verseAndRef}` }],
 		[{
-			text: "عربی",
+			text: "متن عربی(سایر)",
 			callback_data: `h${verseAndRef}`,
 		}],
-		[{ text: "آیه ی بعد", callback_data: `i${verseAndRef}` }, { text: "آیه ی قبل", callback_data: `j${verseAndRef}` }],
-		[{ text: "تفسیر نمونه", callback_data: `k${verseAndRef}` }]
+		[{ text: "نتیجه بعد ⬅️", callback_data: `a${verseAndRef}` }, { text: "➡️ نتیجه قبل", callback_data: `b${verseAndRef}` }]
 	];
 	return buttons;
 }
