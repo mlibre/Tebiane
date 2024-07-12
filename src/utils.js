@@ -69,6 +69,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 			const tafsirText = $( element ).text()
 			if ( canAddToMessage( currentMessageLength, tafsirText ) )
 			{
+				// todo persianize text
 				translationTexts.push( normalizeMessage( tafsirText ) );
 				currentMessageLength += tafsirText.length;
 
