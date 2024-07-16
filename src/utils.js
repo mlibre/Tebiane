@@ -113,21 +113,25 @@ exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
 	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
 	const buttons = [
 		[
-			{ text: "آیه ی بعد", callback_data: `${actionCodes.nextVerse}${verseAndRef}` },
-			{ text: "آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verseAndRef}` }
+			{ text: "آیه ی بعد ⬅️", callback_data: `${actionCodes.nextVerse}${verseAndRef}` },
+			{
+				text: "🇸🇦 متن عربی 🇸🇦",
+				callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
+			},
+			{ text: "➡️ آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verseAndRef}` }
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
 		[
 			{ text: "تفسیر نمونه بخش ۲", callback_data: `${actionCodes.tafsirNemooneh[1]}${verseAndRef}` },
 			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verseAndRef}` }
 		],
-		[{
-			text: "متن عربی(سایر)",
-			callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
-		}],
+		// [{
+		// 	text: "متن عربی(سایر)",
+		// 	callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
+		// }],
 		[
-			{ text: "نتیجه بعد ⬅️", callback_data: `${actionCodes.nextResult}${verseAndRef}` },
-			{ text: "➡️ نتیجه قبل", callback_data: `${actionCodes.prevResult}${verseAndRef}` }
+			{ text: "نتیجه بعد 🔍", callback_data: `${actionCodes.nextResult}${verseAndRef}` },
+			{ text: "🔎 نتیجه قبل", callback_data: `${actionCodes.prevResult}${verseAndRef}` }
 		]
 	];
 	return buttons;
