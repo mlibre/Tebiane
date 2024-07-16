@@ -46,7 +46,7 @@ errorHandler( bot );
 bot.on( "message", async ( msg ) =>
 {
 	if ( msg.text.includes( "/resources" ) || msg.text.includes( "/search" ) ||
-		msg.text.includes( "/setlang" ) || msg.text.includes( "/start" ) )
+		msg.text.includes( "/start" ) )
 	{
 		return;
 	}
