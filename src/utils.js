@@ -59,7 +59,6 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	}
 	if ( element.length > 0 )
 	{
-		if ( limitReached ) return;
 		const firstH3 = $( element ).find( "h3:first" );
 		if ( firstH3.text() != "" )
 		{
@@ -71,18 +70,18 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 		{
 			if ( limitReached ) return;
 			const tafsirChunk = $( element ).text()
-			if ( canAddToMessage( totalMessageLength, tafsirChunk ) )
-			{
-				// todo persianize text
-				translationTexts.push( normalizeMessage( tafsirChunk ) );
-				totalMessageLength += tafsirChunk.length;
-
-			}
-			else
+			const addMessage = canAddToMessage( totalMessageLength, tafsirChunk, part )
+			if ( addMessage == -1 )
 			{
 				limitReached = true;
 				return false;
 			}
+			if ( addMessage )
+			{
+				// todo persianize text
+				translationTexts.push( normalizeMessage( tafsirChunk ) );
+			}
+			totalMessageLength += tafsirChunk.length;
 		});
 	};
 	if ( translationTexts.length <= 1 )
@@ -104,7 +103,10 @@ exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
 			{ text: "آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verseAndRef}` }
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
-		[{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh1}${verseAndRef}` }],
+		[
+			{ text: "تفسیر نمونه بخش ۲", callback_data: `${actionCodes.tafsirNemooneh2}${verseAndRef}` },
+			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh1}${verseAndRef}` }
+		],
 		[{
 			text: "متن عربی(سایر)",
 			callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
@@ -175,9 +177,16 @@ function extractInfoByRefIndex ( refIndex )
 	return { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber, currentAyahNumber, currentAyahPersianNumber };
 }
 
-function canAddToMessage ( currentLength, newText )
+function canAddToMessage ( totalLength, newText, part )
 {
-	return currentLength + newText.length <= messageLength;
+	if ( totalLength + newText.length > ( part + 1 ) * messageLength )
+	{
+		return -1;
+	}
+	return (
+		totalLength + newText.length >= part * messageLength &&
+		totalLength + newText.length <= ( part + 1 ) * messageLength
+	);
 }
 
 function normalizeMessage ( message )
