@@ -68,7 +68,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH.text()}${markdownCodes.bold}`;
 		}
 		translationTexts.push( normalizeMessage( headerTest ) );
-		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6" );
+		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6, h5" );
 		elementsAfterFirstH3.each( ( index, element ) =>
 		{
 			if ( limitReached ) return;
@@ -90,6 +90,10 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 				{
 					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
 				}
+				// else if ( element.name == "h5" )
+				// {
+				// 	translationTexts.push( normalizeMessage( `📓 ${tafsirChunk}` ) );
+				// }
 			}
 			totalMessageLength += tafsirChunk.length;
 		});
