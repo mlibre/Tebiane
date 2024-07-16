@@ -12,13 +12,21 @@ if ( proxy )
 }
 exports.botOptions = botOptions;
 exports.token = process.env.TELEGRAM_BOT_TOKEN;
-exports.messageLength = 3000; // Telegram message character limit
+exports.messageLength = 2500; // Telegram message character limit
+
+exports.markdownCodes = {
+	bold: "booold@",
+	italic: "italic@",
+	underline: "underline@",
+	strikethrough: "strikethrough@",
+	code: "code@",
+	spoiler: "spoiler@"
+};
 
 const actionCodes = {
 	nextVerse: "i",
 	prevVerse: "j",
-	tafsirNemooneh1: "k",
-	tafsirNemooneh2: "l",
+	tafsirNemooneh: ["k", "l"],
 	nextResult: "a",
 	prevResult: "b",
 	arabicText: "g",

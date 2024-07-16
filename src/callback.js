@@ -83,18 +83,9 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 			},
 		})
 	}
-	else if ( actionCodes.tafsirNemooneh1 === action || actionCodes.tafsirNemooneh2 == action ) // tafsir nemuneh
+	else if ( actionCodes.tafsirNemooneh.indexOf( action ) != -1 ) // tafsir nemuneh
 	{
-		let part;
-		if ( actionCodes.tafsirNemooneh1 === action )
-		{
-			part = 0;
-		}
-		else if ( actionCodes.tafsirNemooneh2 === action )
-		{
-			part = 1;
-		}
-		const message = await generateTafsirNemunehMessage( verseRefIndex, part );
+		const message = await generateTafsirNemunehMessage( verseRefIndex, actionCodes.tafsirNemooneh.indexOf( action ) );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {

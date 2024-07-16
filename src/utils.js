@@ -2,7 +2,7 @@ const quran = require( "../sources/quran.json" );
 const axios = require( "axios" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
-const { all_translations, perian_translations, actionCodes, messageLength } = require( "./configs" )
+const { all_translations, perian_translations, actionCodes, messageLength, markdownCodes } = require( "./configs" )
 
 exports.generateMessage = function generateMessage ( refIndex, transaltionCode = "f" )
 {
@@ -60,13 +60,13 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	if ( element.length > 0 )
 	{
 		const firstH3 = $( element ).find( "h3:first" );
-		if ( firstH3.text() != "" )
+		if ( firstH3.text() != "" && part == 0 )
 		{
-			headerTest += `\n\n 📝 ${ firstH3.text()}`;
+			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH3.text()}${markdownCodes.bold}`;
 		}
 		translationTexts.push( normalizeMessage( headerTest ) );
-		const psAfterFirstH3 = firstH3.nextAll( "p" );
-		psAfterFirstH3.each( ( index, element ) =>
+		const elementsAfterFirstH3 = firstH3.nextAll( "p, h3" );
+		elementsAfterFirstH3.each( ( index, element ) =>
 		{
 			if ( limitReached ) return;
 			const tafsirChunk = $( element ).text()
@@ -79,7 +79,14 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 			if ( addMessage )
 			{
 				// todo persianize text
-				translationTexts.push( normalizeMessage( tafsirChunk ) );
+				if ( element.name == "p" )
+				{
+					translationTexts.push( normalizeMessage( tafsirChunk ) );
+				}
+				else if ( element.name == "h3" )
+				{
+					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
+				}
 			}
 			totalMessageLength += tafsirChunk.length;
 		});
@@ -104,8 +111,8 @@ exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
 		[
-			{ text: "تفسیر نمونه بخش ۲", callback_data: `${actionCodes.tafsirNemooneh2}${verseAndRef}` },
-			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh1}${verseAndRef}` }
+			{ text: "تفسیر نمونه بخش ۲", callback_data: `${actionCodes.tafsirNemooneh[1]}${verseAndRef}` },
+			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verseAndRef}` }
 		],
 		[{
 			text: "متن عربی(سایر)",
@@ -197,7 +204,8 @@ function normalizeMessage ( message )
 	.replace( /\*/g, "\\*" ) // commenting this will cause problem if message contains opening start but not closed like: *something
 	// message must be like this in MarkdownV2 format: *something*
 	.replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
-	.replace( /\=/g, "\\=" );
+	.replace( /\=/g, "\\=" )
+	.replace( new RegExp( `${markdownCodes.bold}(.*?)${markdownCodes.bold}`, "g" ), ( match, p1 ) => { return `*${p1}*` });
 }
 
 function isNetworkError ( error )
