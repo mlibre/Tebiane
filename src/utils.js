@@ -100,7 +100,7 @@ exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
 			{ text: "آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verseAndRef}` }
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
-		[{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh}${verseAndRef}` }],
+		[{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh1}${verseAndRef}` }],
 		[{
 			text: "متن عربی(سایر)",
 			callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,

@@ -83,7 +83,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 			},
 		})
 	}
-	else if ( actionCodes.tafsirNemooneh === action ) // tafsir nemuneh
+	else if ( actionCodes.tafsirNemooneh1 === action ) // tafsir nemuneh
 	{
 		const message = await generateTafsirNemunehMessage( verseRefIndex );
 		await editMessageWithRetry( bot, message, {

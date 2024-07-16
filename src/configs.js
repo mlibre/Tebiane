@@ -16,27 +16,32 @@ exports.token = process.env.TELEGRAM_BOT_TOKEN;
 const actionCodes = {
 	nextVerse: "i",
 	prevVerse: "j",
-	tafsirNemooneh: "k",
+	tafsirNemooneh1: "k",
+	tafsirNemooneh2: "l",
 	nextResult: "a",
 	prevResult: "b",
 	arabicText: "g",
-	arabicIrabText: "h"
+	arabicIrabText: "h",
+	ansarian: "c",
+	fooladvand: "d",
+	mojtabavi: "e",
+	makarem: "f"
 };
 
 const perian_translations = {
-	"c": {
+	[actionCodes.ansarian]: {
 		farsi: "انصاریان",
 		key: "farsi_ansarian"
 	},
-	"d": {
+	[actionCodes.fooladvand]: {
 		farsi: "فولادوند",
 		key: "farsi_fooladvand"
 	},
-	"e": {
+	[actionCodes.mojtabavi]: {
 		farsi: "مجتبوی",
 		key: "farsi_mojtabavi"
 	},
-	"f": {
+	[actionCodes.makarem]: {
 		farsi: "مکارم شیرازی",
 		key: "farsi_makarem"
 	}
@@ -52,7 +57,6 @@ const arabic_texts = {
 		key: "arabic_enhanced"
 	}
 }
-
 exports.perian_translations = perian_translations;
 exports.all_translations = { ...perian_translations, ...arabic_texts };
 exports.actionCodes = actionCodes;
