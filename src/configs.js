@@ -12,6 +12,7 @@ if ( proxy )
 }
 exports.botOptions = botOptions;
 exports.token = process.env.TELEGRAM_BOT_TOKEN;
+exports.messageLength = 3000; // Telegram message character limit
 
 const actionCodes = {
 	nextVerse: "i",

@@ -2,8 +2,7 @@ const quran = require( "../sources/quran.json" );
 const axios = require( "axios" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
-
-const { all_translations, perian_translations, actionCodes } = require( "./configs" )
+const { all_translations, perian_translations, actionCodes, messageLength } = require( "./configs" )
 
 exports.generateMessage = function generateMessage ( refIndex, transaltionCode = "f" )
 {
@@ -40,7 +39,7 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex )
 {
 	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
-		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex, part );
 
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 
@@ -173,8 +172,7 @@ function extractInfoByRefIndex ( refIndex )
 
 function canAddToMessage ( currentLength, newText )
 {
-	const maxLength = 3000; // Telegram message character limit
-	return currentLength + newText.length <= maxLength;
+	return currentLength + newText.length <= messageLength;
 }
 
 function normalizeMessage ( message )
