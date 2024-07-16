@@ -27,9 +27,9 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 	}
 	else if ( actionCodes.nextVerse === action ) // next ayeh
 	{
-		if ( verseRefIndex + 3 < quran.length )
+		if ( verseRefIndex + 1 < quran.length )
 		{
-			verseRefIndex += 3;
+			verseRefIndex += 1;
 		}
 		const message = generateMessage( verseRefIndex );
 		await editMessageWithRetry( bot, message, {
@@ -41,9 +41,9 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 	}
 	else if ( actionCodes.prevVerse === action ) // previous ayeh
 	{
-		if ( verseRefIndex - 3 >= 0 )
+		if ( verseRefIndex - 1 >= 0 )
 		{
-			verseRefIndex -= 3;
+			verseRefIndex -= 1;
 		}
 		const message = generateMessage( verseRefIndex );
 		await editMessageWithRetry( bot, message, {

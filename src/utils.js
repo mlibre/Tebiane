@@ -28,9 +28,9 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 		throw new Error( `Invalid translation code: ${transaltionCode}` );
 	}
 	let message = `> ${currentSurahTitle} 🕊️ ترجمه ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
-		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber - 1 )}\n` : ""}
+		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${currentAyahNumber - 1}\n` : ""}
 		${currentAyah.verse[translator.key]} ۝ ${currentAyahPersianNumber}\n
-		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${toPersian( currentAyahNumber + 1 )}` : ""}`;
+		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${currentAyahNumber + 1}` : ""}`;
 
 	message = normalizeMessage( message );
 	return message;
@@ -42,7 +42,6 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
-
 	const response = await axios.get( url, { responseType: "text/html" });
 	let htmlString = response.data;
 	htmlString = htmlString.replace( /\s+/g, " " ).trim();
@@ -59,13 +58,17 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	}
 	if ( element.length > 0 )
 	{
-		const firstH3 = $( element ).find( "h3:first" );
-		if ( firstH3.text() != "" && part == 0 )
+		let firstH = $( element ).find( "h3:first" );
+		if ( firstH.length === 0 )
 		{
-			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH3.text()}${markdownCodes.bold}`;
+			firstH = $( element ).find( "h6:first" );
+		}
+		if ( firstH.text() != "" && part == 0 )
+		{
+			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH.text()}${markdownCodes.bold}`;
 		}
 		translationTexts.push( normalizeMessage( headerTest ) );
-		const elementsAfterFirstH3 = firstH3.nextAll( "p, h3" );
+		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6" );
 		elementsAfterFirstH3.each( ( index, element ) =>
 		{
 			if ( limitReached ) return;
@@ -83,7 +86,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 				{
 					translationTexts.push( normalizeMessage( tafsirChunk ) );
 				}
-				else if ( element.name == "h3" )
+				else if ( element.name == "h3" || element.name == "h6" )
 				{
 					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
 				}
@@ -198,14 +201,14 @@ function canAddToMessage ( totalLength, newText, part )
 
 function normalizeMessage ( message )
 {
-	return message.replace( /!/g, "\\!" ).replace( /\./g, "\\." )
+	return toPersian( message.replace( /!/g, "\\!" ).replace( /\./g, "\\." )
 	.replace( /-/g, "\\-" ).replace( /\(/g, "\\(" ).replace( /\)/g, "\\)" )
 	.replace( /\]/g, "\\]" ).replace( /\[/g, "\\[" ).replace( /_/g, "\\_" )
 	.replace( /\*/g, "\\*" ) // commenting this will cause problem if message contains opening start but not closed like: *something
 	// message must be like this in MarkdownV2 format: *something*
 	.replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
 	.replace( /\=/g, "\\=" )
-	.replace( new RegExp( `${markdownCodes.bold}(.*?)${markdownCodes.bold}`, "g" ), ( match, p1 ) => { return `*${p1}*` });
+	.replace( new RegExp( `${markdownCodes.bold}(.*?)${markdownCodes.bold}`, "g" ), ( match, p1 ) => { return `*${p1}*` }) );
 }
 
 function isNetworkError ( error )
@@ -233,6 +236,5 @@ const persian_numbers_map = {
 
 function toPersian ( number )
 {
-	const chars = number.toString().split( "" ).map( char => { return persian_numbers_map[char] });
-	return chars.join( "" );
+	return number.toString().split( "" ).map( char => { return persian_numbers_map[char] || char }).join( "" );
 }
