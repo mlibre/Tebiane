@@ -49,7 +49,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	const $ = cheerio.load( htmlString );
 
 	const translationTexts = [];
-	let currentMessageLength = 0;
+	let totalMessageLength = 0;
 	let limitReached = false;
 	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
 	const element = $( ".interpretation-text" );
@@ -70,12 +70,12 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 		psAfterFirstH3.each( ( index, element ) =>
 		{
 			if ( limitReached ) return;
-			const tafsirText = $( element ).text()
-			if ( canAddToMessage( currentMessageLength, tafsirText ) )
+			const tafsirChunk = $( element ).text()
+			if ( canAddToMessage( totalMessageLength, tafsirChunk ) )
 			{
 				// todo persianize text
-				translationTexts.push( normalizeMessage( tafsirText ) );
-				currentMessageLength += tafsirText.length;
+				translationTexts.push( normalizeMessage( tafsirChunk ) );
+				totalMessageLength += tafsirChunk.length;
 
 			}
 			else
