@@ -36,10 +36,10 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 	return message;
 }
 
-exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex )
+exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex, part )
 {
 	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
-		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex, part );
+		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 
@@ -52,7 +52,12 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	let currentMessageLength = 0;
 	let limitReached = false;
 	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
-	$( ".interpretation-text" ).each( ( index, element ) =>
+	const element = $( ".interpretation-text" );
+	if ( element.length > 1 )
+	{
+		console.error( `Found more than one interpretation text for ${currentSurahTitle} ${currentAyahNumber}` );
+	}
+	if ( element.length > 0 )
 	{
 		if ( limitReached ) return;
 		const firstH3 = $( element ).find( "h3:first" );
@@ -79,7 +84,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 				return false;
 			}
 		});
-	});
+	};
 	if ( translationTexts.length <= 1 )
 	{
 		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
