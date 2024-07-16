@@ -1,11 +1,26 @@
+require( "dotenv" ).config()
+
+const proxy = process.env.PROXY;
+const botOptions = {
+	polling: true
+};
+if ( proxy )
+{
+	botOptions.request = {
+		proxy
+	};
+}
+exports.botOptions = botOptions;
+exports.token = process.env.TELEGRAM_BOT_TOKEN;
+
 const actionCodes = {
 	nextVerse: "i",
 	prevVerse: "j",
 	tafsirNemooneh: "k",
-	arabicText: "g",
-	arabicIrabText: "h",
 	nextResult: "a",
-	prevResult: "b"
+	prevResult: "b",
+	arabicText: "g",
+	arabicIrabText: "h"
 };
 
 const perian_translations = {

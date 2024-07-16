@@ -1,6 +1,3 @@
-const fs = require( "fs" );
-const path = require( "path" );
-require( "dotenv" ).config()
 const Fuse = require( "fuse.js" );
 const TelegramBot = require( "node-telegram-bot-api" );
 const quran = require( "../sources/quran.json" );
@@ -9,19 +6,7 @@ const resources = require( "./resources" );
 const search = require( "./search" );
 const callback = require( "./callback" );
 
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const proxy = process.env.PROXY;
-
-const botOptions = {
-	polling: true
-};
-if ( proxy )
-{
-	botOptions.request = {
-		proxy
-	};
-}
-
+const { botOptions, token } = require( "./configs" );
 const bot = new TelegramBot( token, botOptions );
 // const fuseKeys = ["surah.number", "surah.persian_number",
 // 	"surah.arabic", "surah.farsi", "ayah", "ayah_persian",
@@ -44,7 +29,6 @@ const fuseKeys = [
 	{ name: "id", weight: 0.05 },
 	{ name: "id_persian", weight: 0.05 },
 ];
-
 
 const fuseIndex = Fuse.createIndex( fuseKeys, quran )
 
@@ -81,7 +65,7 @@ bot.onText( /\/resources/, async ( msg, match ) =>
 
 bot.on( "callback_query", async ( callbackQuery ) =>
 {
-	const { data } = callbackQuery;
+	const { data } = callbackQuery; // 'k1475_@1463,6155,106,1053,2000,6149,392,592'
 	const chatId = callbackQuery.message.chat.id
 	const messageId = callbackQuery.message.message_id
 	return await callback( bot, data, chatId, messageId );

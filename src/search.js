@@ -1,4 +1,4 @@
-const { generateMessage, buttons, sendMessageWithRetry } = require( "./utils" );
+const { generateMessage, genButtons, sendMessageWithRetry } = require( "./utils" );
 
 module.exports = async function search ( bot, fuse, text, chatId )
 {
@@ -8,11 +8,11 @@ module.exports = async function search ( bot, fuse, text, chatId )
 	if ( searchResult.length > 0 )
 	{
 		const { refIndex } = searchResult[0];
-		const refIndexes = searchResult.map( result => { return result.refIndex }).slice( 0, 8 );
+		const refResults = searchResult.map( result => { return result.refIndex }).slice( 0, 8 );
 		const message = generateMessage( refIndex );
 		await sendMessageWithRetry( bot, chatId, message, {
 			reply_markup: {
-				inline_keyboard: buttons( refIndex, refIndex, refIndexes )
+				inline_keyboard: genButtons( refIndex, refIndex, refResults )
 			},
 			parse_mode: "MarkdownV2"
 		});

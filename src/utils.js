@@ -90,11 +90,10 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	return result;
 }
 
-
-exports.buttons = function buttons ( verseRefIndex, refIndex, refIndexes )
+exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
 {
-	const refIndexesStr = refIndexes.map( index => { return index === refIndex ? `@${index}` : index }).join( "," );
-	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`;
+	const refIndexesStr = refResults.map( index => { return index === refIndex ? `@${index}` : index }).join( "," );
+	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
 	const buttons = [
 		[
 			{ text: "آیه ی بعد", callback_data: `${actionCodes.nextVerse}${verseAndRef}` },
@@ -189,7 +188,7 @@ function normalizeMessage ( message )
 	.replace( /\=/g, "\\=" );
 }
 
-isNetworkError = function isNetworkError ( error )
+function isNetworkError ( error )
 {
 	return error.message.includes( "socket hang up" ) || error.message.includes( "network socket disconnected" );
 }
