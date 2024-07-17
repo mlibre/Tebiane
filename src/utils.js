@@ -81,7 +81,6 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 			}
 			if ( addMessage )
 			{
-				// todo persianize text
 				if ( element.name == "p" )
 				{
 					translationTexts.push( normalizeMessage( tafsirChunk ) );
@@ -107,11 +106,37 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	return result;
 }
 
-exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
+exports.genButtons = function genButtons ( verseRefIndex, searchRefIndex, refResults, actionCode )
 {
-	const refIndexesStr = refResults.map( index => { return index === refIndex ? `@${index}` : index }).join( "," );
+	const refIndexesStr = refResults.map( index => { return index === searchRefIndex ? `@${index}` : index }).join( "," );
 	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
-	const buttons = [
+	if ( actionCodes.tafsirNemooneh.includes( actionCode ) )
+	{
+		const tafsirButtons = []; // break in two lines of buttons
+		for ( let index = 0; index < actionCodes.tafsirNemooneh.length; index++ )
+		{
+			const code = actionCodes.tafsirNemooneh[index]
+			if ( index == 0 )
+			{
+				tafsirButtons.push({
+					text: "تفسیر نمونه",
+					callback_data: `${code}${verseAndRef}`
+				})
+			}
+			tafsirButtons.push({
+				text: `${index + 1}`,
+				callback_data: `${code}${verseAndRef}`
+			})
+		}
+		tafsirButtons.reverse()
+		return [
+			tafsirButtons,
+			[
+				{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${verseAndRef}` }
+			]
+		]
+	}
+	return buttons = [
 		[
 			{ text: "آیه ی بعد ⬅️", callback_data: `${actionCodes.nextVerse}${verseAndRef}` },
 			{
@@ -122,19 +147,41 @@ exports.genButtons = function genButtons ( verseRefIndex, refIndex, refResults )
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
 		[
-			{ text: "تفسیر نمونه بخش ۲", callback_data: `${actionCodes.tafsirNemooneh[1]}${verseAndRef}` },
 			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verseAndRef}` }
 		],
 		// [{
-		// 	text: "متن عربی(سایر)",
-		// 	callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
+		// 	text: "سایر",
+		// 	callback_data: `${actionCodes.others}${verseAndRef}`,
 		// }],
 		[
 			{ text: "نتیجه بعد 🔍", callback_data: `${actionCodes.nextResult}${verseAndRef}` },
 			{ text: "🔎 نتیجه قبل", callback_data: `${actionCodes.prevResult}${verseAndRef}` }
 		]
 	];
-	return buttons;
+}
+
+exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId, message, options, retries = 10 )
+{
+	for ( let i = 0; i < retries; i++ )
+	{
+		try
+		{
+			await bot.sendMessage( chatId, message, options );
+			break;
+		}
+		catch ( error )
+		{
+			if ( isNetworkError( error ) )
+			{
+				console.log( `Retrying due to socket hang up... Attempts left: ${retries - i - 1}` );
+				await sleep( 50 )
+			}
+			else
+			{
+				throw error;
+			}
+		}
+	}
 }
 
 exports.editMessageWithRetry = async function editMessageWithRetry ( bot, message, options, retries = 10 )
@@ -161,13 +208,13 @@ exports.editMessageWithRetry = async function editMessageWithRetry ( bot, messag
 	}
 }
 
-exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId, message, options, retries = 10 )
+exports.editMessageReplyMarkupWithRetry = async function editMessageReplyMarkupWithRetry ( bot, replyMerkup, options, retries = 10 )
 {
 	for ( let i = 0; i < retries; i++ )
 	{
 		try
 		{
-			await bot.sendMessage( chatId, message, options );
+			await bot.editMessageReplyMarkup( replyMerkup, options );
 			break;
 		}
 		catch ( error )

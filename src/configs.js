@@ -24,17 +24,18 @@ exports.markdownCodes = {
 };
 
 const actionCodes = {
-	nextVerse: "i",
-	prevVerse: "j",
-	tafsirNemooneh: ["k", "l"],
 	nextResult: "a",
 	prevResult: "b",
-	arabicText: "g",
-	arabicIrabText: "h",
 	ansarian: "c",
 	fooladvand: "d",
 	mojtabavi: "e",
-	makarem: "f"
+	makarem: "f",
+	arabicText: "g",
+	arabicIrabText: "h",
+	nextVerse: "i",
+	prevVerse: "j",
+	tafsirNemooneh: ["k", "l", "m", "n", "o", "p", "q"],
+	mainPage: "r"
 };
 
 const perian_translations = {

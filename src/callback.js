@@ -1,9 +1,10 @@
 const quran = require( "../sources/quran.json" );
 const {
 	generateMessage,
-	genButtons,
 	editMessageWithRetry,
-	generateTafsirNemunehMessage } = require( "./utils" );
+	editMessageReplyMarkupWithRetry,
+	generateTafsirNemunehMessage,
+	genButtons, } = require( "./utils" );
 const { all_translations, actionCodes } = require( "./configs" )
 
 module.exports = async function callback_query ( bot, input, chatId, messageId )
@@ -89,8 +90,17 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes, action )
 			},
+		})
+	}
+	else if ( action === actionCodes.mainPage ) // main page
+	{
+		const replyMerkup = {
+			inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes )
+		}
+		await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
+			...messageOptions
 		})
 	}
 	else
