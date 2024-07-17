@@ -124,7 +124,7 @@ exports.genButtons = function genButtons ( verseRefIndex, searchRefIndex, refRes
 				})
 			}
 			tafsirButtons.push({
-				text: `${index + 1}`,
+				text: code === actionCode ? `✅ ${index + 1}` : `${index + 1}`,
 				callback_data: `${code}${verseAndRef}`
 			})
 		}
