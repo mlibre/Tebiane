@@ -68,7 +68,7 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH.text()}${markdownCodes.bold}`;
 		}
 		translationTexts.push( normalizeMessage( headerTest ) );
-		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6, h5" );
+		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6" );
 		elementsAfterFirstH3.each( ( index, element ) =>
 		{
 			if ( limitReached ) return;
@@ -121,13 +121,6 @@ exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, 
 		for ( let index = 0; index < totalParts; index++ )
 		{
 			const code = actionCodes.tafsirNemooneh[index]
-			if ( index == 0 )
-			{
-				tafsirButtons.push({
-					text: "تفسیر نمونه",
-					callback_data: `${code}${verseAndRef}`
-				})
-			}
 			tafsirButtons.push({
 				text: code === actionCode ? `✅ ${index + 1}` : `${index + 1}`,
 				callback_data: `${code}${verseAndRef}`
@@ -141,6 +134,10 @@ exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, 
 		}
 		tafsirButtonsLines.reverse()
 		return [
+			[{
+				text: "تفسیر نمونه",
+				callback_data: `${actionCodes.tafsirNemooneh[0]}${verseAndRef}`
+			}],
 			...tafsirButtonsLines,
 			[
 				{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${verseAndRef}` }
@@ -251,7 +248,7 @@ async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber
 	htmlString = htmlString.replace( /\s+/g, " " ).trim();
 	const $ = cheerio.load( htmlString );
 
-	const elementsAfterFirstH3 = $( ".interpretation-text" ).find( "h3:first, h6:first" ).nextAll( "p, h3, h6, h5" );
+	const elementsAfterFirstH3 = $( ".interpretation-text" ).find( "h3:first, h6:first" ).nextAll( "p, h3, h6" );
 	let totalLength = 0;
 	elementsAfterFirstH3.each( ( index, element ) =>
 	{

@@ -34,8 +34,8 @@ const actionCodes = {
 	arabicIrabText: "h",
 	nextVerse: "i",
 	prevVerse: "j",
-	tafsirNemooneh: ["k", "l", "m", "n", "o", "p", "q"],
-	mainPage: "r"
+	tafsirNemooneh: ["k", "l", "m", "n", "o", "p", "q", "r"],
+	mainPage: "s"
 };
 
 const perian_translations = {
