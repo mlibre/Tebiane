@@ -22,7 +22,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
 			},
 		})
 	}
@@ -36,7 +36,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
 			},
 		});
 	}
@@ -50,7 +50,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
 			},
 		});
 	}
@@ -65,7 +65,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( refIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes )
 			},
 		})
 	}
@@ -80,7 +80,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( refIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes )
 			},
 		})
 	}
@@ -90,14 +90,14 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes, action )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, action )
 			},
 		})
 	}
 	else if ( action === actionCodes.mainPage ) // main page
 	{
 		const replyMerkup = {
-			inline_keyboard: genButtons( verseRefIndex, refIndex, refIndexes )
+			inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
 		}
 		await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
 			...messageOptions

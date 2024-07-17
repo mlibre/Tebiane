@@ -106,14 +106,19 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	return result;
 }
 
-exports.genButtons = function genButtons ( verseRefIndex, searchRefIndex, refResults, actionCode )
+exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, refResults, actionCode )
 {
-	const refIndexesStr = refResults.map( index => { return index === searchRefIndex ? `@${index}` : index }).join( "," );
+	const refIndexesStr = refResults.map( index =>
+	{
+		return index === searchRefIndex ? `@${index}` : index
+	}).join( "," );
 	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
 	if ( actionCodes.tafsirNemooneh.includes( actionCode ) )
 	{
+		const { currentSurahNumber, currentAyahNumber } = extractInfoByRefIndex( verseRefIndex );
+		const totalParts = await calculateTotalTafsirParts( currentSurahNumber, currentAyahNumber );
 		const tafsirButtons = []; // break in two lines of buttons
-		for ( let index = 0; index < actionCodes.tafsirNemooneh.length; index++ )
+		for ( let index = 0; index < totalParts; index++ )
 		{
 			const code = actionCodes.tafsirNemooneh[index]
 			if ( index == 0 )
@@ -129,12 +134,18 @@ exports.genButtons = function genButtons ( verseRefIndex, searchRefIndex, refRes
 			})
 		}
 		tafsirButtons.reverse()
+		const tafsirButtonsLines = [];
+		for ( let i = 0; i < tafsirButtons.length; i += 5 )
+		{
+			tafsirButtonsLines.push( tafsirButtons.slice( i, i + 5 ) );
+		}
+		tafsirButtonsLines.reverse()
 		return [
-			tafsirButtons,
+			...tafsirButtonsLines,
 			[
 				{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${verseAndRef}` }
 			]
-		]
+		];
 	}
 	return buttons = [
 		[
@@ -230,6 +241,24 @@ exports.editMessageReplyMarkupWithRetry = async function editMessageReplyMarkupW
 			}
 		}
 	}
+}
+
+async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
+{
+	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
+	const response = await axios.get( url, { responseType: "text/html" });
+	let htmlString = response.data;
+	htmlString = htmlString.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( htmlString );
+
+	const elementsAfterFirstH3 = $( ".interpretation-text" ).find( "h3:first, h6:first" ).nextAll( "p, h3, h6, h5" );
+	let totalLength = 0;
+	elementsAfterFirstH3.each( ( index, element ) =>
+	{
+		totalLength += $( element ).text().length;
+	});
+
+	return Math.ceil( totalLength / messageLength );
 }
 
 function extractInfoByRefIndex ( refIndex )

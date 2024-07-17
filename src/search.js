@@ -12,7 +12,7 @@ module.exports = async function search ( bot, fuse, text, chatId )
 		const message = generateMessage( refIndex );
 		await sendMessageWithRetry( bot, chatId, message, {
 			reply_markup: {
-				inline_keyboard: genButtons( refIndex, refIndex, refResults )
+				inline_keyboard: await genButtons( refIndex, refIndex, refResults )
 			},
 			parse_mode: "MarkdownV2"
 		});
