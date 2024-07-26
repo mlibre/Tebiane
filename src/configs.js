@@ -12,7 +12,7 @@ if ( proxy )
 }
 exports.botOptions = botOptions;
 exports.token = process.env.TELEGRAM_BOT_TOKEN;
-exports.messageLength = 2000; // Telegram message character limit
+exports.messageLength = 2100; // Telegram message character limit
 
 exports.markdownCodes = {
 	bold: "booold@",
