@@ -133,6 +133,11 @@ exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, 
 			tafsirButtonsLines.push( tafsirButtons.slice( i, i + 5 ) );
 		}
 		tafsirButtonsLines.reverse()
+		const isRead = await isTafsirNemunehReadByUser()
+		tafsirButtonsLines.push( [{
+			text: isRead === true ? "مطالعه شده ✅" : "مطالعه نشده}",
+			callback_data: `${actionCodes.isRead}${verseAndRef}`
+		}] )
 		return [
 			[{
 				text: "تفسیر نمونه",
@@ -238,6 +243,11 @@ exports.editMessageReplyMarkupWithRetry = async function editMessageReplyMarkupW
 			}
 		}
 	}
+}
+
+async function isTafsirNemunehReadByUser ()
+{
+	return true
 }
 
 async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
