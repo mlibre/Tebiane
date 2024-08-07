@@ -36,7 +36,10 @@ const actionCodes = {
 	prevVerse: "j",
 	tafsirNemooneh: ["k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w"],
 	mainPage: "x",
-	isRead: "y",
+	hasRead: "y",
+	hasNotRead: "z",
+	toggleRead: "A",
+	others: "B"
 };
 
 const perian_translations = {

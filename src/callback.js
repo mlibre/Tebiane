@@ -6,6 +6,7 @@ const {
 	generateTafsirNemunehMessage,
 	genButtons, } = require( "./utils" );
 const { all_translations, actionCodes } = require( "./configs" )
+const database = require( "./database" );
 
 module.exports = async function callback_query ( bot, input, chatId, messageId )
 {
@@ -14,19 +15,24 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		message_id: messageId,
 		parse_mode: "MarkdownV2"
 	}
-	let { action, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
+	let { actionCode, readCode, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
 
-	if ( all_translations[action] ) // translation
+	const userOtions = {
+		actionCode,
+		chatId,
+		messageId
+	}
+	if ( all_translations[actionCode] ) // translation
 	{
-		const message = generateMessage( verseRefIndex, action );
+		const message = generateMessage( verseRefIndex, actionCode );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
 			},
 		})
 	}
-	else if ( actionCodes.nextVerse === action ) // next ayeh
+	else if ( actionCodes.nextVerse === actionCode ) // next ayeh
 	{
 		if ( verseRefIndex + 1 < quran.length )
 		{
@@ -36,11 +42,11 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
 			},
 		});
 	}
-	else if ( actionCodes.prevVerse === action ) // previous ayeh
+	else if ( actionCodes.prevVerse === actionCode ) // previous ayeh
 	{
 		if ( verseRefIndex - 1 >= 0 )
 		{
@@ -50,11 +56,11 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
 			},
 		});
 	}
-	else if ( actionCodes.nextResult === action ) // next result
+	else if ( actionCodes.nextResult === actionCode ) // next result
 	{
 		const refIndexPosition = refIndexes.indexOf( refIndex );
 		if ( refIndexPosition + 1 < refIndexes.length )
@@ -65,11 +71,11 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes, userOtions )
 			},
 		})
 	}
-	else if ( actionCodes.prevResult === action ) // previous result
+	else if ( actionCodes.prevResult === actionCode ) // previous result
 	{
 		const refIndexPosition = refIndexes.indexOf( refIndex );
 		if ( refIndexPosition - 1 >= 0 )
@@ -80,24 +86,35 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes )
+				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes, userOtions )
 			},
 		})
 	}
-	else if ( actionCodes.tafsirNemooneh.indexOf( action ) != -1 ) // tafsir nemuneh
+	else if ( actionCodes.tafsirNemooneh.indexOf( actionCode ) != -1 ) // tafsir nemuneh
 	{
-		const message = await generateTafsirNemunehMessage( verseRefIndex, actionCodes.tafsirNemooneh.indexOf( action ) );
+		if ( readCode === actionCodes.toggleRead )
+		{
+			if ( await database.getTafsir( `${chatId}${verseRefIndex}` ) )
+			{
+				await database.deleteTafsir( `${chatId}${verseRefIndex}` )
+			}
+			else
+			{
+				await database.putTafsir( `${chatId}${verseRefIndex}`, true )
+			}
+		}
+		const message = await generateTafsirNemunehMessage( verseRefIndex, actionCodes.tafsirNemooneh.indexOf( actionCode ) );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, action )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
 			},
 		})
 	}
-	else if ( action === actionCodes.mainPage ) // main page
+	else if ( actionCode === actionCodes.mainPage ) // main page
 	{
 		const replyMerkup = {
-			inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes )
+			inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
 		}
 		await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
 			...messageOptions
@@ -111,8 +128,9 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 
 function parseCallbackData ( input )
 {
-	const action = input[0];
-	const [verseRefIndexStr, refIndexesStr] = input.slice( 1 ).split( "_" );
+	const actionCode = input[0];
+	const readCode = input[1];
+	const [verseRefIndexStr, refIndexesStr] = input.slice( 2 ).split( "_" );
 	let refIndex = -1;
 	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
 	{
@@ -123,5 +141,5 @@ function parseCallbackData ( input )
 		}
 		return tmp;
 	});
-	return { action, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+	return { actionCode, readCode, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
 }

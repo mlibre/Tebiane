@@ -1,7 +1,8 @@
-const quran = require( "../sources/quran.json" );
 const axios = require( "axios" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
+const database = require( "./database" );
+const quran = require( "../sources/quran.json" );
 const { all_translations, perian_translations, actionCodes, messageLength, markdownCodes } = require( "./configs" )
 
 exports.generateMessage = function generateMessage ( refIndex, transaltionCode = "f" )
@@ -106,13 +107,14 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	return result;
 }
 
-exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, refResults, actionCode )
+exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, refResults, { actionCode, chatId, messageId })
 {
 	const refIndexesStr = refResults.map( index =>
 	{
 		return index === searchRefIndex ? `@${index}` : index
 	}).join( "," );
-	const verseAndRef = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
+	const verse_ref = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
+	const read_verse_ref = `${actionCodes.others}${verseRefIndex}_${refIndexesStr}`; // y1475_@1463,6155,106,1053,2000,6149,392,592
 	if ( actionCodes.tafsirNemooneh.includes( actionCode ) )
 	{
 		const { currentSurahNumber, currentAyahNumber } = extractInfoByRefIndex( verseRefIndex );
@@ -123,7 +125,7 @@ exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, 
 			const code = actionCodes.tafsirNemooneh[index]
 			tafsirButtons.push({
 				text: code === actionCode ? `✅ ${index + 1}` : `${index + 1}`,
-				callback_data: `${code}${verseAndRef}`
+				callback_data: `${code}${read_verse_ref}`
 			})
 		}
 		tafsirButtons.reverse()
@@ -133,42 +135,42 @@ exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, 
 			tafsirButtonsLines.push( tafsirButtons.slice( i, i + 5 ) );
 		}
 		tafsirButtonsLines.reverse()
-		const isRead = await isTafsirNemunehReadByUser()
+		const isRead = await isTafsirNemunehReadByUser( chatId, verseRefIndex )
 		tafsirButtonsLines.push( [{
-			text: isRead === true ? "مطالعه شده ✅" : "مطالعه نشده}",
-			callback_data: `${actionCodes.isRead}${verseAndRef}`
+			text: isRead === true ? "مطالعه شده ✅" : "مطالعه نشده",
+			callback_data: `${actionCode}${actionCodes.toggleRead}${verse_ref}`
 		}] )
 		return [
 			[{
 				text: "تفسیر نمونه",
-				callback_data: `${actionCodes.tafsirNemooneh[0]}${verseAndRef}`
+				callback_data: `${actionCodes.tafsirNemooneh[0]}${read_verse_ref}`
 			}],
 			...tafsirButtonsLines,
 			[
-				{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${verseAndRef}` }
+				{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${read_verse_ref}` }
 			]
 		];
 	}
 	return buttons = [
 		[
-			{ text: "آیه ی بعد ⬅️", callback_data: `${actionCodes.nextVerse}${verseAndRef}` },
+			{ text: "آیه ی بعد ⬅️", callback_data: `${actionCodes.nextVerse}${read_verse_ref}` },
 			{
 				text: "🇸🇦 متن عربی 🇸🇦",
-				callback_data: `${actionCodes.arabicIrabText}${verseAndRef}`,
+				callback_data: `${actionCodes.arabicIrabText}${read_verse_ref}`,
 			},
-			{ text: "➡️ آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verseAndRef}` }
+			{ text: "➡️ آیه ی قبل", callback_data: `${actionCodes.prevVerse}${read_verse_ref}` }
 		],
-		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verseAndRef}` } }),
+		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${read_verse_ref}` } }),
 		[
-			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verseAndRef}` }
+			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${read_verse_ref}` }
 		],
 		// [{
 		// 	text: "سایر",
 		// 	callback_data: `${actionCodes.others}${verseAndRef}`,
 		// }],
 		[
-			{ text: "نتیجه بعد 🔍", callback_data: `${actionCodes.nextResult}${verseAndRef}` },
-			{ text: "🔎 نتیجه قبل", callback_data: `${actionCodes.prevResult}${verseAndRef}` }
+			{ text: "نتیجه بعد 🔍", callback_data: `${actionCodes.nextResult}${read_verse_ref}` },
+			{ text: "🔎 نتیجه قبل", callback_data: `${actionCodes.prevResult}${read_verse_ref}` }
 		]
 	];
 }
@@ -245,9 +247,9 @@ exports.editMessageReplyMarkupWithRetry = async function editMessageReplyMarkupW
 	}
 }
 
-async function isTafsirNemunehReadByUser ()
+async function isTafsirNemunehReadByUser ( chatId, verseRefIndex )
 {
-	return true
+	return await database.getTafsir( `${chatId}${verseRefIndex}` );
 }
 
 async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )

@@ -50,7 +50,7 @@ bot.on( "message", async ( msg ) =>
 	{
 		return;
 	}
-	return await search( bot, fuse, msg.text, msg.chat.id );
+	return await search( bot, fuse, msg.text, msg.chat.id, msg.message_id );
 });
 
 bot.onText( /\/search (.+)/, async ( msg, match ) =>
