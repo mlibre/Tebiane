@@ -16,7 +16,12 @@ module.exports = async function search ( bot, fuse, text, chatId, messageId )
 			reply_markup: {
 				inline_keyboard: await genButtons(
 					refIndex, refIndex, refResults,
-					{ actionCode: config.actionCodes.makarem, chatId, messageId }
+					{
+						actionCode: config.actionCodes.makarem,
+						lastTranslaction: config.actionCodes.makarem,
+						chatId,
+						messageId
+					}
 				)
 			},
 			parse_mode: "MarkdownV2"

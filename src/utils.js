@@ -107,14 +107,17 @@ exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessa
 	return result;
 }
 
-exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, refResults, { actionCode, chatId, messageId })
+exports.genButtons = async function genButtons (
+	verseRefIndex, searchRefIndex, refResults,
+	{ actionCode, lastTranslaction, chatId, messageId }
+)
 {
 	const refIndexesStr = refResults.map( index =>
 	{
 		return index === searchRefIndex ? `@${index}` : index
 	}).join( "," );
-	const verse_ref = `${actionCode}${verseRefIndex}_${refIndexesStr}`; // i1475_@1463,6155,106,1053,2000,6149,392,592
-	const read_verse_ref = `${actionCode}${actionCodes.others}${verseRefIndex}_${refIndexesStr}`; // iy1475_@1463,6155,106,1053,2000,6149,392,592
+	const verse_ref = `${actionCode}${lastTranslaction}${verseRefIndex}_${refIndexesStr}`; // i1475_@1463,6155,106,1053,2000,6149,392,592
+	const read_verse_ref = `${actionCode}${lastTranslaction}${actionCodes.others}${verseRefIndex}_${refIndexesStr}`; // iy1475_@1463,6155,106,1053,2000,6149,392,592
 	if ( actionCodes.tafsirNemooneh.includes( actionCode ) )
 	{
 		const { currentSurahNumber, currentAyahNumber } = extractInfoByRefIndex( verseRefIndex );

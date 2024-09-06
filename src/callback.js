@@ -15,16 +15,18 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		message_id: messageId,
 		parse_mode: "MarkdownV2"
 	}
-	let { actionCode, previousActionCode, readCode, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
+	let { actionCode, previousActionCode, lastTranslaction, readCode, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
 
 	const userOtions = {
 		actionCode,
 		previousActionCode,
+		lastTranslaction,
 		chatId,
 		messageId
 	}
 	if ( all_translations[actionCode] ) // translation
 	{
+		userOtions.lastTranslaction = actionCode;
 		const message = generateMessage( verseRefIndex, actionCode );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
@@ -39,7 +41,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		{
 			verseRefIndex += 1;
 		}
-		const message = generateMessage( verseRefIndex );
+		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
@@ -53,7 +55,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		{
 			verseRefIndex -= 1;
 		}
-		const message = generateMessage( verseRefIndex );
+		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
@@ -131,8 +133,9 @@ function parseCallbackData ( input )
 {
 	const actionCode = input[0];
 	const previousActionCode = input[1];
-	const readCode = input[2];
-	const [verseRefIndexStr, refIndexesStr] = input.slice( 3 ).split( "_" );
+	const lastTranslaction = input[2];
+	const readCode = input[3];
+	const [verseRefIndexStr, refIndexesStr] = input.slice( 4 ).split( "_" );
 	let refIndex = -1;
 	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
 	{
@@ -143,5 +146,5 @@ function parseCallbackData ( input )
 		}
 		return tmp;
 	});
-	return { actionCode, previousActionCode, readCode, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+	return { actionCode, previousActionCode, lastTranslaction, readCode, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
 }
