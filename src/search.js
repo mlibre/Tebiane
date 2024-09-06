@@ -11,7 +11,7 @@ module.exports = async function search ( bot, fuse, text, chatId, messageId )
 	{
 		const { refIndex } = searchResult[0];
 		const refResults = searchResult.map( result => { return result.refIndex }).slice( 0, 8 );
-		const message = generateMessage( refIndex );
+		const message = generateMessage( refIndex, config.actionCodes.makarem );
 		await sendMessageWithRetry( bot, chatId, message, {
 			reply_markup: {
 				inline_keyboard: await genButtons(
