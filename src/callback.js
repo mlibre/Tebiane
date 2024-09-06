@@ -116,12 +116,19 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 	}
 	else if ( actionCode === actionCodes.mainPage ) // main page
 	{
-		const replyMerkup = {
-			inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
-		}
-		await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
-			...messageOptions
+		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
+		await editMessageWithRetry( bot, message, {
+			...messageOptions,
+			reply_markup: {
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+			},
 		})
+		// const replyMerkup = {
+		// 	inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+		// }
+		// await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
+		// 	...messageOptions
+		// })
 	}
 	else
 	{
