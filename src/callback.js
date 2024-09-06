@@ -15,10 +15,11 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		message_id: messageId,
 		parse_mode: "MarkdownV2"
 	}
-	let { actionCode, readCode, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
+	let { actionCode, previousActionCode, readCode, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
 
 	const userOtions = {
 		actionCode,
+		previousActionCode,
 		chatId,
 		messageId
 	}
@@ -129,8 +130,9 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 function parseCallbackData ( input )
 {
 	const actionCode = input[0];
-	const readCode = input[1];
-	const [verseRefIndexStr, refIndexesStr] = input.slice( 2 ).split( "_" );
+	const previousActionCode = input[1];
+	const readCode = input[2];
+	const [verseRefIndexStr, refIndexesStr] = input.slice( 3 ).split( "_" );
 	let refIndex = -1;
 	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
 	{
@@ -141,5 +143,5 @@ function parseCallbackData ( input )
 		}
 		return tmp;
 	});
-	return { actionCode, readCode, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+	return { actionCode, previousActionCode, readCode, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
 }

@@ -5,7 +5,7 @@ const database = require( "./database" );
 const quran = require( "../sources/quran.json" );
 const { all_translations, perian_translations, actionCodes, messageLength, markdownCodes } = require( "./configs" )
 
-exports.generateMessage = function generateMessage ( refIndex, transaltionCode = "f" )
+exports.generateMessage = function generateMessage ( refIndex, transaltionCode = actionCodes.makarem )
 {
 	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
 		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( refIndex );
@@ -113,13 +113,13 @@ exports.genButtons = async function genButtons ( verseRefIndex, searchRefIndex, 
 	{
 		return index === searchRefIndex ? `@${index}` : index
 	}).join( "," );
-	const verse_ref = `${verseRefIndex}_${refIndexesStr}`; // 1475_@1463,6155,106,1053,2000,6149,392,592
-	const read_verse_ref = `${actionCodes.others}${verseRefIndex}_${refIndexesStr}`; // y1475_@1463,6155,106,1053,2000,6149,392,592
+	const verse_ref = `${actionCode}${verseRefIndex}_${refIndexesStr}`; // i1475_@1463,6155,106,1053,2000,6149,392,592
+	const read_verse_ref = `${actionCode}${actionCodes.others}${verseRefIndex}_${refIndexesStr}`; // iy1475_@1463,6155,106,1053,2000,6149,392,592
 	if ( actionCodes.tafsirNemooneh.includes( actionCode ) )
 	{
 		const { currentSurahNumber, currentAyahNumber } = extractInfoByRefIndex( verseRefIndex );
 		const totalParts = await calculateTotalTafsirParts( currentSurahNumber, currentAyahNumber );
-		const tafsirButtons = []; // break in two lines of buttons
+		const tafsirButtons = [];
 		for ( let index = 0; index < totalParts; index++ )
 		{
 			const code = actionCodes.tafsirNemooneh[index]

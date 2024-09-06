@@ -14,7 +14,10 @@ module.exports = async function search ( bot, fuse, text, chatId, messageId )
 		const message = generateMessage( refIndex );
 		await sendMessageWithRetry( bot, chatId, message, {
 			reply_markup: {
-				inline_keyboard: await genButtons( refIndex, refIndex, refResults, { chatId, messageId })
+				inline_keyboard: await genButtons(
+					refIndex, refIndex, refResults,
+					{ actionCode: config.actionCodes.makarem, chatId, messageId }
+				)
 			},
 			parse_mode: "MarkdownV2"
 		});
