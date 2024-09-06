@@ -70,7 +70,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		{
 			refIndex = refIndexes[refIndexPosition + 1];
 		}
-		const message = generateMessage( refIndex );
+		const message = generateMessage( refIndex, userOtions.lastTranslaction );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
@@ -85,7 +85,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		{
 			refIndex = refIndexes[refIndexPosition - 1];
 		}
-		const message = generateMessage( refIndex );
+		const message = generateMessage( refIndex, userOtions.lastTranslaction );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
