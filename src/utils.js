@@ -28,7 +28,12 @@ exports.generateMessage = function generateMessage ( refIndex, transaltionCode =
 	{
 		throw new Error( `Invalid translation code: ${transaltionCode}` );
 	}
-	let message = `> ${currentSurahTitle} 🕊️ ترجمه ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
+	let translatorWord = "ترجمه"
+	if ( transaltionCode == "h" )
+	{
+		translatorWord = "متن"
+	}
+	let message = `> ${currentSurahTitle} 🕊️ ${translatorWord} ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${
 		prevAyah ? `${prevAyah.verse[translator.key]} ۝ ${currentAyahNumber - 1}\n` : ""}
 		${currentAyah.verse[translator.key]} ۝ ${currentAyahPersianNumber}\n
 		${nextAyah ? `${nextAyah.verse[translator.key]} ۝ ${currentAyahNumber + 1}` : ""}`;
