@@ -39,7 +39,8 @@ const actionCodes = {
 	hasRead: "y",
 	hasNotRead: "z",
 	toggleRead: "A",
-	others: "B"
+	others: "B",
+	saanNuzul: "C" // New action code for Saan Nuzul
 };
 
 const perian_translations = {

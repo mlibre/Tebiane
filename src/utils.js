@@ -5,6 +5,113 @@ const database = require( "./database" );
 const quran = require( "../sources/quran.json" );
 const { all_translations, perian_translations, actionCodes, messageLength, markdownCodes } = require( "./configs" )
 
+exports.generateSaanNuzulMessage = async function generateSaanNuzulMessage ( verseRefIndex )
+{
+	const { currentSurahTitle, currentSurahTitlePersian, currentSurahNumber,
+		currentSurahPersianNumber,	currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+
+	const url = `https://wiki.ahlolbait.com/آیه_${currentAyahNumber}_سوره_${currentSurahTitlePersian}`;
+	const response = await axios.get( url, { responseType: "text/html" });
+	let htmlString = response.data;
+	htmlString = htmlString.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( htmlString );
+
+	const saanNuzulTexts = [];
+	let headerTest = `> ${currentSurahTitle} 🕊️ شان نزول 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
+	saanNuzulTexts.push( normalizeMessage( headerTest ) );
+
+	const nuzulSection = $( ".mw-parser-output" ).find( "h2" ).filter( function ()
+	{
+		return $( this ).text().trim() === "نزول";
+	}).nextUntil( "h2" );
+
+	if ( nuzulSection.length > 0 )
+	{
+		nuzulSection.each( ( index, element ) =>
+		{
+			const saanNuzulChunk = $( element ).text();
+			saanNuzulTexts.push( normalizeMessage( saanNuzulChunk ) );
+		});
+	}
+	else
+	{
+		saanNuzulTexts.push( normalizeMessage( "سبب نزولی برای این آیه پیدا نشد." ) );
+	}
+
+	const result = saanNuzulTexts.join( "\n\n" );
+	return result;
+}
+
+exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex, part )
+{
+	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
+		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+
+	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
+	const response = await axios.get( url, { responseType: "text/html" });
+	let htmlString = response.data;
+	htmlString = htmlString.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( htmlString );
+
+	const translationTexts = [];
+	let totalMessageLength = 0;
+	let limitReached = false;
+	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
+	const element = $( ".interpretation-text" );
+	if ( element.length > 1 )
+	{
+		console.error( `Found more than one interpretation text for ${currentSurahTitle} ${currentAyahNumber}` );
+	}
+	if ( element.length > 0 )
+	{
+		let firstH = $( element ).find( "h3:first" );
+		if ( firstH.length === 0 )
+		{
+			firstH = $( element ).find( "h6:first" );
+		}
+		if ( firstH.text() != "" && part == 0 )
+		{
+			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH.text()}${markdownCodes.bold}`;
+		}
+		translationTexts.push( normalizeMessage( headerTest ) );
+		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6" );
+		elementsAfterFirstH3.each( ( index, element ) =>
+		{
+			if ( limitReached ) return;
+			const tafsirChunk = $( element ).text()
+			const addMessage = canAddToMessage( totalMessageLength, tafsirChunk, part )
+			if ( addMessage == -1 )
+			{
+				limitReached = true;
+				return false;
+			}
+			if ( addMessage )
+			{
+				if ( element.name == "p" )
+				{
+					translationTexts.push( normalizeMessage( tafsirChunk ) );
+				}
+				else if ( element.name == "h3" || element.name == "h6" )
+				{
+					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
+				}
+				// else if ( element.name == "h5" )
+				// {
+				// 	translationTexts.push( normalizeMessage( `📓 ${tafsirChunk}` ) );
+				// }
+			}
+			totalMessageLength += tafsirChunk.length;
+		});
+	};
+	if ( translationTexts.length <= 1 )
+	{
+		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
+	}
+	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
+	const result = translationTexts.join( "\n\n" );
+	return result;
+}
+
 exports.generateMessage = function generateMessage ( refIndex, transaltionCode = actionCodes.makarem )
 {
 	const {
@@ -88,78 +195,6 @@ ${nextAyahText}`;
 	return normalizeMessage( message );
 }
 
-
-
-exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex, part )
-{
-	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
-		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
-
-	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
-	const response = await axios.get( url, { responseType: "text/html" });
-	let htmlString = response.data;
-	htmlString = htmlString.replace( /\s+/g, " " ).trim();
-	const $ = cheerio.load( htmlString );
-
-	const translationTexts = [];
-	let totalMessageLength = 0;
-	let limitReached = false;
-	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
-	const element = $( ".interpretation-text" );
-	if ( element.length > 1 )
-	{
-		console.error( `Found more than one interpretation text for ${currentSurahTitle} ${currentAyahNumber}` );
-	}
-	if ( element.length > 0 )
-	{
-		let firstH = $( element ).find( "h3:first" );
-		if ( firstH.length === 0 )
-		{
-			firstH = $( element ).find( "h6:first" );
-		}
-		if ( firstH.text() != "" && part == 0 )
-		{
-			headerTest += `\n\n 📝 ${markdownCodes.bold}${ firstH.text()}${markdownCodes.bold}`;
-		}
-		translationTexts.push( normalizeMessage( headerTest ) );
-		const elementsAfterFirstH3 = firstH.nextAll( "p, h3, h6" );
-		elementsAfterFirstH3.each( ( index, element ) =>
-		{
-			if ( limitReached ) return;
-			const tafsirChunk = $( element ).text()
-			const addMessage = canAddToMessage( totalMessageLength, tafsirChunk, part )
-			if ( addMessage == -1 )
-			{
-				limitReached = true;
-				return false;
-			}
-			if ( addMessage )
-			{
-				if ( element.name == "p" )
-				{
-					translationTexts.push( normalizeMessage( tafsirChunk ) );
-				}
-				else if ( element.name == "h3" || element.name == "h6" )
-				{
-					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
-				}
-				// else if ( element.name == "h5" )
-				// {
-				// 	translationTexts.push( normalizeMessage( `📓 ${tafsirChunk}` ) );
-				// }
-			}
-			totalMessageLength += tafsirChunk.length;
-		});
-	};
-	if ( translationTexts.length <= 1 )
-	{
-		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
-	}
-	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
-	const result = translationTexts.join( "\n\n" );
-	return result;
-}
-
 exports.genButtons = async function genButtons (
 	verseRefIndex, searchRefIndex, refResults,
 	{ actionCode, lastTranslaction, chatId, messageId }
@@ -197,10 +232,12 @@ exports.genButtons = async function genButtons (
 			callback_data: `${actionCode}${toggle_verse_ref}`
 		}] )
 		return [
-			[{
-				text: "تفسیر نمونه",
-				callback_data: `${actionCodes.tafsirNemooneh[0]}${verse_ref}`
-			}],
+			[
+				{
+					text: "تفسیر نمونه",
+					callback_data: `${actionCodes.tafsirNemooneh[0]}${verse_ref}`
+				}
+			],
 			...tafsirButtonsLines,
 			[
 				{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${verse_ref}` }
@@ -218,18 +255,19 @@ exports.genButtons = async function genButtons (
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verse_ref}` } }),
 		[
-			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verse_ref}` }
+			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verse_ref}` },
+			{
+				text: "شان نزول",
+				callback_data: `${actionCodes.saanNuzul}${verse_ref}`
+			}
 		],
-		// [{
-		// 	text: "سایر",
-		// 	callback_data: `${actionCodes.others}${verseAndRef}`,
-		// }],
 		[
 			{ text: "نتیجه بعد 🔍", callback_data: `${actionCodes.nextResult}${verse_ref}` },
 			{ text: "🔎 نتیجه قبل", callback_data: `${actionCodes.prevResult}${verse_ref}` }
 		]
 	];
 }
+
 
 exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId, message, options, retries = 10 )
 {
@@ -329,11 +367,12 @@ async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber
 function extractInfoByRefIndex ( refIndex )
 {
 	const currentSurahTitle = quran[refIndex].surah.arabic;
+	const currentSurahTitlePersian = quran[refIndex].surah.farsi;
 	const currentSurahNumber = quran[refIndex].surah.number;
 	const currentSurahPersianNumber = quran[refIndex].surah.persian_number;
 	const currentAyahNumber = quran[refIndex].ayah;
 	const currentAyahPersianNumber = quran[refIndex].ayah_persian;
-	return { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber, currentAyahNumber, currentAyahPersianNumber };
+	return { currentSurahTitle, currentSurahTitlePersian, currentSurahNumber, currentSurahPersianNumber, currentAyahNumber, currentAyahPersianNumber };
 }
 
 function canAddToMessage ( totalLength, newText, part )

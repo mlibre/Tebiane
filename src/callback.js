@@ -4,7 +4,8 @@ const {
 	editMessageWithRetry,
 	editMessageReplyMarkupWithRetry,
 	generateTafsirNemunehMessage,
-	genButtons, } = require( "./utils" );
+	genButtons,
+	generateSaanNuzulMessage } = require( "./utils" );
 const { all_translations, actionCodes } = require( "./configs" )
 const database = require( "./database" );
 
@@ -113,6 +114,16 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
 			},
 		})
+	}
+	else if ( actionCodes.saanNuzul === actionCode ) // saan nuzul
+	{
+		const message = await generateSaanNuzulMessage( verseRefIndex );
+		await editMessageWithRetry( bot, message, {
+			...messageOptions,
+			reply_markup: {
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+			},
+		});
 	}
 	else if ( actionCode === actionCodes.mainPage ) // main page
 	{
