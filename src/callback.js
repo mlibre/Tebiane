@@ -42,7 +42,16 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		{
 			verseRefIndex += 1;
 		}
-		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
+		let message
+		if ( previousActionCode == actionCodes.saanNuzul )
+		{
+			userOtions.actionCode = actionCodes.saanNuzul;
+			message = await generateSaanNuzulMessage( verseRefIndex );
+		}
+		else
+		{
+			message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
+		}
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
@@ -56,7 +65,16 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		{
 			verseRefIndex -= 1;
 		}
-		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
+		let message
+		if ( previousActionCode == actionCodes.saanNuzul )
+		{
+			userOtions.actionCode = actionCodes.saanNuzul;
+			message = await generateSaanNuzulMessage( verseRefIndex );
+		}
+		else
+		{
+			message = generateMessage( verseRefIndex, userOtions.lastTranslaction );
+		}
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
