@@ -38,6 +38,7 @@ exports.generateSaanNuzulMessage = async function generateSaanNuzulMessage ( ver
 		saanNuzulTexts.push( normalizeMessage( "سبب نزولی برای این آیه پیدا نشد." ) );
 	}
 
+	saanNuzulTexts.push( `[🔗 لینک به وب سایت اهل البیت](${url})` );
 	const result = saanNuzulTexts.join( "\n\n" );
 	return result;
 }
