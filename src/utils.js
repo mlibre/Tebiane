@@ -1,3 +1,4 @@
+const { execSync } = require( "child_process" );
 const axios = require( "axios" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
@@ -43,7 +44,68 @@ exports.generateSaanNuzulMessage = async function generateSaanNuzulMessage ( ver
 	return result;
 }
 
-exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex, part )
+exports.generateTafsirNemunehMessage = function generateTafsirNemunehMessage ( verseRefIndex, part )
+{
+	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
+		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+
+	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
+	const rdrview = getRdrviewOutput( url )
+	rdrviewTrim = rdrview.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( rdrviewTrim );
+
+	const translationTexts = [];
+	let totalMessageLength = 0;
+	let limitReached = false;
+	let headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`
+	const element = $( ".page" );
+	if ( element.length > 1 )
+	{
+		console.error( `Found more than one interpretation text for ${currentSurahTitle} ${currentAyahNumber}` );
+	}
+	if ( element.length > 0 )
+	{
+		translationTexts.push( normalizeMessage( headerTest ) );
+		const elementsAfterFirstH3 = element.find( "p, h3, h6" );
+		elementsAfterFirstH3.each( ( index, element ) =>
+		{
+			if ( limitReached ) return;
+			const tafsirChunk = $( element ).text().trim()
+			if ( !tafsirChunk ) return
+			const addMessage = canAddToMessage( totalMessageLength, tafsirChunk, part )
+			if ( addMessage == -1 )
+			{
+				limitReached = true;
+				return false;
+			}
+			if ( addMessage )
+			{
+				if ( element.name == "p" )
+				{
+					translationTexts.push( normalizeMessage( tafsirChunk ) );
+				}
+				else if ( element.name == "h3" || element.name == "h6" )
+				{
+					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
+				}
+				// else if ( element.name == "h5" )
+				// {
+				// 	translationTexts.push( normalizeMessage( `📓 ${tafsirChunk}` ) );
+				// }
+			}
+			totalMessageLength += tafsirChunk.length;
+		});
+	};
+	if ( translationTexts.length <= 1 )
+	{
+		translationTexts.push( normalizeMessage( "تفسیری برای این آیه پیدا نشد. معمولا در آیات قبلی یا بعدی تفسیری قرار دارد" ) );
+	}
+	translationTexts.push( `[🔗 لینک به وب سایت تفسیر](${url})` );
+	const result = translationTexts.join( "\n\n" );
+	return result;
+}
+
+exports.generateTafsirNemunehMessageOld = async function generateTafsirNemunehMessageOld ( verseRefIndex, part )
 {
 	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
 		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
@@ -269,7 +331,6 @@ exports.genButtons = async function genButtons (
 	];
 }
 
-
 exports.sendMessageWithRetry = async function sendMessageWithRetry ( bot, chatId, message, options, retries = 10 )
 {
 	for ( let i = 0; i < retries; i++ )
@@ -347,7 +408,28 @@ async function isTafsirNemunehReadByUser ( chatId, verseRefIndex )
 	return await database.getTafsir( `${chatId}${verseRefIndex}` );
 }
 
-async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
+function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
+{
+	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
+	const rdrview = getRdrviewOutput( url );
+	const rdrviewTrim = rdrview.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( rdrviewTrim );
+	const pageElement = $( ".page" );
+	if ( pageElement.length === 0 )
+	{
+		console.error( `No interpretation text found for Surah ${currentSurahNumber}, Ayah ${currentAyahNumber}` );
+		return 0;
+	}
+	const tafsirElements = pageElement.find( "p, h3, h6" );
+	let totalLength = 0;
+	tafsirElements.each( ( index, element ) =>
+	{
+		totalLength += $( element ).text().trim().length;
+	});
+	return Math.ceil( totalLength / messageLength );
+};
+
+async function calculateTotalTafsirPartsOld ( currentSurahNumber, currentAyahNumber )
 {
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const response = await axios.get( url, { responseType: "text/html" });
@@ -398,6 +480,20 @@ function normalizeMessage ( message )
 	.replace( /\{/g, "\\{" ).replace( /\}/g, "\\}" )
 	.replace( /\=/g, "\\=" )
 	.replace( new RegExp( `${markdownCodes.bold}(.*?)${markdownCodes.bold}`, "g" ), ( match, p1 ) => { return `*${p1}*` }) );
+}
+
+function getRdrviewOutput ( link )
+{
+	try
+	{
+		const command = `rdrview "${link}" -H`;
+		const output = execSync( command, { encoding: "utf-8" });
+		return output;
+	}
+	catch ( error )
+	{
+		return `Error executing command: ${error.message}`;
+	}
 }
 
 function isNetworkError ( error )
