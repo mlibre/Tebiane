@@ -282,10 +282,6 @@ exports.genButtons = async function genButtons (
 	return buttons = [
 		[
 			{ text: "آیه ی بعد ⬅️", callback_data: `${actionCodes.nextVerse}${verse_ref}` },
-			{
-				text: "🇸🇦 متن عربی 🇸🇦",
-				callback_data: `${actionCodes.arabicIrabText}${verse_ref}`
-			},
 			{ text: "➡️ آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verse_ref}` }
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verse_ref}` } }),
