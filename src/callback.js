@@ -5,7 +5,8 @@ const {
 	editMessageReplyMarkupWithRetry,
 	generateTafsirNemunehMessage,
 	genButtons,
-	generateSaanNuzulMessage } = require( "./utils" );
+	generateSaanNuzulMessage,
+	generateKhameneiMessage } = require( "./utils" );
 const { all_translations, actionCodes } = require( "./configs" )
 const database = require( "./database" );
 
@@ -143,6 +144,29 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 			},
 		});
 	}
+	else if ( actionCodes.khamenei.indexOf( actionCode ) != -1 )
+	{
+		// Replace in the khamenei section:
+		if ( readCode === actionCodes.toggleRead )
+		{
+			if ( await database.getKhamenei( `${chatId}${verseRefIndex}` ) )
+			{
+				await database.deleteKhamenei( `${chatId}${verseRefIndex}` )
+			}
+			else
+			{
+				await database.putKhamenei( `${chatId}${verseRefIndex}`, true )
+			}
+		}
+		const message = await generateKhameneiMessage( verseRefIndex, actionCodes.khamenei.indexOf( actionCode ) );
+		await editMessageWithRetry( bot, message, {
+			...messageOptions,
+			reply_markup: {
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+			},
+		});
+	}
+
 	else if ( actionCode === actionCodes.mainPage ) // main page
 	{
 		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );

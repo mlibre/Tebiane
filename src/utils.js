@@ -1,5 +1,7 @@
 const { execSync } = require( "child_process" );
 const axios = require( "axios" );
+var { Readability } = require( "@mozilla/readability" );
+var { JSDOM } = require( "jsdom" );
 const cheerio = require( "cheerio" );
 const _ = require( "lodash" );
 const database = require( "./database" );
@@ -44,13 +46,13 @@ exports.generateSaanNuzulMessage = async function generateSaanNuzulMessage ( ver
 	return result;
 }
 
-exports.generateTafsirNemunehMessage = function generateTafsirNemunehMessage ( verseRefIndex, part )
+exports.generateTafsirNemunehMessage = async function generateTafsirNemunehMessage ( verseRefIndex, part )
 {
 	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
 		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
-	const rdrview = getRdrviewOutput( url )
+	const rdrview = await getReadabilityOutput( url )
 	rdrviewTrim = rdrview.replace( /\s+/g, " " ).trim();
 	const $ = cheerio.load( rdrviewTrim );
 
@@ -237,18 +239,59 @@ exports.genButtons = async function genButtons (
 			]
 		];
 	}
+	if ( actionCodes.khamenei.includes( actionCode ) )
+	{
+		const { currentSurahNumber, currentAyahNumber } = extractInfoByRefIndex( verseRefIndex );
+		const totalParts = await calculateTotalKhameneiParts( currentSurahNumber, currentAyahNumber );
+		const khameneiButtons = [];
+
+		for ( let index = 0; index < totalParts; index++ )
+		{
+			const code = actionCodes.khamenei[index]
+			khameneiButtons.push({
+				text: code === actionCode ? `✅ ${index + 1}` : `${index + 1}`,
+				callback_data: `${code}${verse_ref}`
+			})
+		}
+
+		khameneiButtons.reverse()
+		const buttonLines = [];
+		for ( let i = 0; i < khameneiButtons.length; i += 5 )
+		{
+			buttonLines.push( khameneiButtons.slice( i, i + 5 ) );
+		}
+		buttonLines.reverse()
+
+		const isRead = await isKhameneiReadByUser( chatId, verseRefIndex )
+
+		buttonLines.push( [{
+			text: isRead === true ? "مطالعه شده ✅" : "مطالعه نشده",
+			callback_data: `${actionCode}${toggle_verse_ref}`
+		}] )
+
+		return [
+			[{
+				text: "فیش های رهبری",
+				callback_data: `${actionCodes.khamenei[0]}${verse_ref}`
+			}],
+			...buttonLines,
+			[{ text: "صفحه ی اصلی", callback_data: `${actionCodes.mainPage}${verse_ref}` }]
+		];
+	}
+
 	return buttons = [
 		[
 			{ text: "آیه ی بعد ⬅️", callback_data: `${actionCodes.nextVerse}${verse_ref}` },
 			{
 				text: "🇸🇦 متن عربی 🇸🇦",
-				callback_data: `${actionCodes.arabicIrabText}${verse_ref}`,
+				callback_data: `${actionCodes.arabicIrabText}${verse_ref}`
 			},
 			{ text: "➡️ آیه ی قبل", callback_data: `${actionCodes.prevVerse}${verse_ref}` }
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) => { return { text: value.farsi, callback_data: `${key}${verse_ref}` } }),
 		[
 			{ text: "تفسیر نمونه", callback_data: `${actionCodes.tafsirNemooneh[0]}${verse_ref}` },
+			{ text: "فیش های رهبری", callback_data: `${actionCodes.khamenei[0]}${verse_ref}` },
 			{
 				text: "شان نزول",
 				callback_data: `${actionCodes.saanNuzul}${verse_ref}`
@@ -333,15 +376,57 @@ exports.editMessageReplyMarkupWithRetry = async function editMessageReplyMarkupW
 	}
 }
 
+exports.generateKhameneiMessage = async function generateKhameneiMessage ( verseRefIndex, part )
+{
+	const { currentSurahNumber, currentAyahNumber, currentSurahTitle,
+		currentSurahPersianNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+
+	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
+	const rdrview = await getReadabilityOutput( url );
+	const rdrviewTrim = rdrview.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( rdrviewTrim );
+
+	const fishTexts = [];
+	let headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
+	fishTexts.push( normalizeMessage( headerText ) );
+	$( "article" ).before( "<br>" );
+	$( "br" ).replaceWith( "\n\n" );
+	const $content = $( "#npTL" );
+	const fishChunk = $( "#npTL" ).text().trim();
+	if ( fishChunk )
+	{
+		const startPos = part * messageLength;
+		const endPos = ( part + 1 ) * messageLength;
+		const partText = fishChunk.substring( startPos, endPos );
+		if ( partText )
+		{
+			fishTexts.push( normalizeMessage( partText ) );
+		}
+	}
+
+	if ( fishTexts.length <= 1 )
+	{
+		fishTexts.push( normalizeMessage( "فیشی برای این آیه پیدا نشد." ) );
+	}
+
+	fishTexts.push( `[🔗 لینک به وب سایت](${url})` );
+	return fishTexts.join( "\n\n" );
+}
+
 async function isTafsirNemunehReadByUser ( chatId, verseRefIndex )
 {
 	return await database.getTafsir( `${chatId}${verseRefIndex}` );
 }
 
-function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
+async function isKhameneiReadByUser ( chatId, verseRefIndex )
+{
+	return await database.getKhamenei( `${chatId}${verseRefIndex}` );
+}
+
+async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
 {
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
-	const rdrview = getRdrviewOutput( url );
+	const rdrview = await getReadabilityOutput( url );
 	const rdrviewTrim = rdrview.replace( /\s+/g, " " ).trim();
 	const $ = cheerio.load( rdrviewTrim );
 	const pageElement = $( ".page" );
@@ -358,6 +443,17 @@ function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
 	});
 	return Math.ceil( totalLength / messageLength );
 };
+
+async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
+{
+	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
+	const rdrview = await getReadabilityOutput( url );
+	const rdrviewTrim = rdrview.replace( /\s+/g, " " ).trim();
+	const $ = cheerio.load( rdrviewTrim );
+
+	const totalLength = $( "#npTL" ).text().trim().length;
+	return Math.ceil( totalLength / messageLength );
+}
 
 function extractInfoByRefIndex ( refIndex )
 {
@@ -394,13 +490,14 @@ function normalizeMessage ( message )
 	.replace( new RegExp( `${markdownCodes.bold}(.*?)${markdownCodes.bold}`, "g" ), ( match, p1 ) => { return `*${p1}*` }) );
 }
 
-function getRdrviewOutput ( link )
+async function getReadabilityOutput ( url )
 {
 	try
 	{
-		const command = `rdrview "${link}" -H`;
-		const output = execSync( command, { encoding: "utf-8" });
-		return output;
+		const dom = await JSDOM.fromURL( url );
+		const reader = new Readability( dom.window.document );
+		const article = reader.parse();
+		return article.content;
 	}
 	catch ( error )
 	{

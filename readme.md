@@ -26,19 +26,8 @@
 
 * Node.js (نسخه 18 یا بالاتر)
 * ربات تلگرام و توکن دسترسی
-* [rdrview](https://github.com/eafer/rdrview)
 
 ### کلن و اجرا
-
-نصب `rdrview`:
-
-```bash
-sudo apt install libxml2-dev libseccomp-dev libcurl4-gnutls-dev lynx
-git clone https://github.com/eafer/rdrview.git
-cd rdrview
-make
-sudo make install
-```
 
 مخزن را کلن کنید و پکیج های مربوط رو نصب کنید:
 

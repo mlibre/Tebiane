@@ -6,6 +6,7 @@ class LevelDatabase
 	{
 		this.db = new Level( "users_history", { valueEncoding: "json" });
 		this.tafsirNemooneh = this.db.sublevel( "tafsirNemooneh", { valueEncoding: "json" });
+		this.khamenei = this.db.sublevel( "khamenei", { valueEncoding: "json" });
 	}
 
 	async batch ( batch )
@@ -83,6 +84,30 @@ class LevelDatabase
 	{
 		await this.tafsirNemooneh.del( key );
 	}
+
+	async putKhamenei ( key, value )
+	{
+		await this.khamenei.put( key, value );
+	}
+
+	async getKhamenei ( key )
+	{
+		try
+		{
+			const result = await this.khamenei.get( key );
+			return result;
+		}
+		catch ( error )
+		{
+			return false;
+		}
+	}
+
+	async deleteKhamenei ( key )
+	{
+		await this.khamenei.del( key );
+	}
+
 }
 
 module.exports = new LevelDatabase();

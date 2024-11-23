@@ -40,7 +40,8 @@ const actionCodes = {
 	hasNotRead: "z",
 	toggleRead: "A",
 	others: "B",
-	saanNuzul: "C" // New action code for Saan Nuzul
+	saanNuzul: "C",
+	khamenei: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
 };
 
 const perian_translations = {
