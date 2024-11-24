@@ -163,7 +163,6 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 			},
 		});
 	}
-
 	else if ( actionCode === actionCodes.mainPage ) // main page
 	{
 		const message = generateMessage( verseRefIndex, userOtions.lastTranslaction );

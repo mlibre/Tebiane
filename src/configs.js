@@ -13,7 +13,7 @@ if ( proxy )
 exports.botOptions = botOptions;
 exports.token = process.env.TELEGRAM_BOT_TOKEN;
 exports.messageLength = 2100; // Telegram message character limit
-
+exports.storagePath = process.env.STORAGE_PATH;
 exports.markdownCodes = {
 	bold: "booold@",
 	italic: "italic@",

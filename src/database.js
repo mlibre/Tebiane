@@ -1,12 +1,13 @@
 const { Level } = require( "level" );
-
+const { storagePath } = require( "./configs" );
 class LevelDatabase
 {
 	constructor ( )
 	{
-		this.db = new Level( "users_history", { valueEncoding: "json" });
+		this.db = new Level( storagePath, { valueEncoding: "json" });
 		this.tafsirNemooneh = this.db.sublevel( "tafsirNemooneh", { valueEncoding: "json" });
 		this.khamenei = this.db.sublevel( "khamenei", { valueEncoding: "json" });
+		this.htmlCache = this.db.sublevel( "htmlCache", { valueEncoding: "json" });
 	}
 
 	async put ( key, value )
@@ -108,5 +109,39 @@ class LevelDatabase
 		await this.khamenei.del( key );
 	}
 
+	// HTML Cache Methods
+	async putHtmlCache ( key, value )
+	{
+		await this.htmlCache.put( key, {
+			content: value,
+			timestamp: Date.now()
+		});
+	}
+
+	async getHtmlCache ( key )
+	{
+		try
+		{
+			const cachedData = await this.htmlCache.get( key );
+			const CACHE_EXPIRATION = 24 * 60 * 60 * 1000; // 24 hours
+
+			if ( Date.now() - cachedData.timestamp < CACHE_EXPIRATION )
+			{
+				return cachedData.content;
+			}
+
+			await this.htmlCache.del( key );
+			return false;
+		}
+		catch ( error )
+		{
+			return false;
+		}
+	}
+
+	async deleteHtmlCache ( key )
+	{
+		await this.htmlCache.del( key );
+	}
 }
 module.exports = new LevelDatabase();

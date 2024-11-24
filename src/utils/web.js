@@ -2,37 +2,67 @@
 const { JSDOM } = require( "jsdom" );
 const { Readability } = require( "@mozilla/readability" );
 const axios = require( "axios" );
+const database = require( "../database" );
 
-exports.getReadabilityOutput = async function ( url )
+async function fetchHtml ( url )
 {
-	const dom = await JSDOM.fromURL( url );
-	const reader = new Readability( dom.window.document );
-	const article = reader.parse();
-	return article.content;
+	// Check cache first
+	const cachedHtml = await database.getHtmlCache( url );
+	if ( cachedHtml )
+	{
+		return cachedHtml;
+	}
+
+	try
+	{
+		const response = await axios.get( url );
+		const htmlContent = response.data;
+
+		// Store in cache
+		await database.putHtmlCache( url, htmlContent );
+
+		return htmlContent;
+	}
+	catch ( error )
+	{
+		console.error( `Error fetching HTML from ${url}:`, error );
+		throw error;
+	}
 }
 
-exports.fetchHtml = async function ( url )
+async function getReadabilityOutput ( url )
 {
-	const response = await axios.get( url, {
-		responseType: "text/html",
-		headers: {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-		}
-	});
-	return response.data;
+	// Check cache first
+	const cachedHtml = await database.getHtmlCache( url );
+	if ( cachedHtml )
+	{
+		return cachedHtml;
+	}
+
+	try
+	{
+		const response = await axios.get( url );
+		const htmlContent = response.data;
+
+		// Store in cache
+		await database.putHtmlCache( url, htmlContent );
+
+		return htmlContent;
+	}
+	catch ( error )
+	{
+		console.error( `Error fetching Readability output from ${url}:`, error );
+		throw error;
+	}
 }
 
-exports.cleanHtmlContent = function ( htmlString )
+function cleanHtmlContent ( htmlString )
 {
 	return htmlString.replace( /\s+/g, " " ).trim();
 }
 
-exports.handleRequestError = function ( error )
-{
-	const errorMessage = error.response
-		? `HTTP Error: ${error.response.status} - ${error.response.statusText}`
-		: `Network Error: ${error.message}`;
-
-	console.error( `Request failed: ${errorMessage}` );
-	return errorMessage;
-}
+module.exports = {
+	fetchHtml,
+	getReadabilityOutput,
+	cleanHtmlContent
+};
