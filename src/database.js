@@ -9,6 +9,29 @@ class LevelDatabase
 		this.khamenei = this.db.sublevel( "khamenei", { valueEncoding: "json" });
 	}
 
+	async put ( key, value )
+	{
+		await this.db.put( key, value );
+	}
+
+	async get ( key )
+	{
+		try
+		{
+			const result = await this.db.get( key );
+			return result;
+		}
+		catch ( error )
+		{
+			return false;
+		}
+	}
+
+	async delete ( key )
+	{
+		await this.db.del( key );
+	}
+
 	async batch ( batch )
 	{
 		if ( batch.length === 0 )
@@ -29,16 +52,6 @@ class LevelDatabase
 		await this.db.close();
 	}
 
-	async put ( key, value )
-	{
-		await this.db.put( key, value );
-	}
-
-	async putTafsir ( key, value )
-	{
-		await this.tafsirNemooneh.put( key, value );
-	}
-
 	async getAll ( )
 	{
 		const result = [];
@@ -49,17 +62,9 @@ class LevelDatabase
 		return result;
 	}
 
-	async get ( key )
+	async putTafsir ( key, value )
 	{
-		try
-		{
-			const result = await this.db.get( key );
-			return result;
-		}
-		catch ( error )
-		{
-			return false;
-		}
+		await this.tafsirNemooneh.put( key, value );
 	}
 
 	async getTafsir ( key )
@@ -73,11 +78,6 @@ class LevelDatabase
 		{
 			return false;
 		}
-	}
-
-	async delete ( key )
-	{
-		await this.db.del( key );
 	}
 
 	async deleteTafsir ( key )
@@ -109,5 +109,4 @@ class LevelDatabase
 	}
 
 }
-
 module.exports = new LevelDatabase();
