@@ -114,6 +114,7 @@ exports.generateKhameneiMessage = async function ( verseRefIndex, part )
 	fishTexts.push( normalizeMessage( headerText ) );
 
 	$( "article" ).before( "<br>" );
+	$( "p" ).before( "<br>" );
 	$( "br" ).replaceWith( "\n\n" );
 	const fishChunk = $( "#npTL" ).text().trim();
 
