@@ -184,10 +184,39 @@ exports.calculateTotalKhameneiParts = async function ( currentSurahNumber, curre
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 	const $ = cheerio.load( cleanHtmlContent( rdrview ) );
-	const totalLength = $( "#npTL" ).text().trim().length;
-	return Math.ceil( totalLength / messageLength );
-}
 
+	$( "header" ).before( "<br>BOLDTEXT" );
+	$( "p" ).before( "<br>" );
+	$( "br" ).replaceWith( "BREAKLINE" );
+	$( "hr" ).replaceWith( "FOOTERLINE" );
+	const fishChunk = $( "#npTL" ).text().trim();
+
+	if ( fishChunk )
+	{
+		let lines = fishChunk.split( "BREAKLINE" );
+		lines = lines.filter( line => { return line.trim() !== "" });
+
+		const processedLines = lines.map( line =>
+		{
+			line = line.trim();
+			if ( line.includes( "BOLDTEXT" ) )
+			{
+				line = line.replace( "BOLDTEXT", "" ).trim();
+				return `📝 ${line}`;
+			}
+			else if ( line.includes( "FOOTERLINE" ) )
+			{
+				return "🔖 ارجاعات";
+			}
+			return line;
+		});
+
+		const totalLength = processedLines.join( "\n" ).length;
+		return Math.ceil( totalLength / messageLength );
+	}
+
+	return 0;
+}
 exports.isTafsirNemunehReadByUser = async function ( chatId, verseRefIndex )
 {
 	return await database.getTafsir( `${chatId}${verseRefIndex}` );
