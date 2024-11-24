@@ -76,3 +76,4 @@ const arabic_texts = {
 exports.perian_translations = perian_translations;
 exports.all_translations = { ...perian_translations, ...arabic_texts };
 exports.actionCodes = actionCodes;
+exports.CACHE_EXPIRATION = 30 * 24 * 60 * 60 * 1000; // 30 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds

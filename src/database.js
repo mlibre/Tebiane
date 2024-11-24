@@ -1,5 +1,5 @@
 const { Level } = require( "level" );
-const { storagePath } = require( "./configs" );
+const { storagePath, CACHE_EXPIRATION } = require( "./configs" );
 class LevelDatabase
 {
 	constructor ( )
@@ -123,7 +123,6 @@ class LevelDatabase
 		try
 		{
 			const cachedData = await this.htmlCache.get( key );
-			const CACHE_EXPIRATION = 24 * 60 * 60 * 1000; // 24 hours
 
 			if ( Date.now() - cachedData.timestamp < CACHE_EXPIRATION )
 			{
