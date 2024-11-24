@@ -1,7 +1,7 @@
 const cheerio = require( "cheerio" );
 const { messageLength, actionCodes, markdownCodes } = require( "../configs" );
 const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers" );
-const { getReadabilityOutput, fetchHtml, cleanHtmlContent } = require( "./web" );
+const { getReadabilityOutput, fetchHtml } = require( "./web" );
 const database = require( "../database" );
 
 exports.generateSaanNuzulMessage = async function ( verseRefIndex )
@@ -11,7 +11,7 @@ exports.generateSaanNuzulMessage = async function ( verseRefIndex )
 
 	const url = `https://wiki.ahlolbait.com/آیه_${currentAyahNumber}_سوره_${currentSurahTitlePersian}`;
 	const htmlString = await fetchHtml( url );
-	const $ = cheerio.load( cleanHtmlContent( htmlString ) );
+	const $ = cheerio.load( htmlString );
 
 	const saanNuzulTexts = [];
 	const headerTest = `> ${currentSurahTitle} 🕊️ شان نزول 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
@@ -46,7 +46,7 @@ exports.generateTafsirNemunehMessage = async function ( verseRefIndex, part )
 
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( cleanHtmlContent( rdrview ) );
+	const $ = cheerio.load( rdrview );
 
 	const translationTexts = [];
 	let totalMessageLength = 0;
@@ -109,7 +109,7 @@ exports.generateKhameneiMessage = async function ( verseRefIndex, part )
 	console.log( url );
 
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( cleanHtmlContent( rdrview ) );
+	const $ = cheerio.load( rdrview );
 
 	const fishTexts = [];
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
@@ -164,7 +164,7 @@ exports.calculateTotalTafsirParts = async function ( currentSurahNumber, current
 {
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( cleanHtmlContent( rdrview ) );
+	const $ = cheerio.load( rdrview );
 
 	const pageElement = $( ".page" );
 	if ( pageElement.length === 0 ) return 0;
@@ -183,7 +183,7 @@ exports.calculateTotalKhameneiParts = async function ( currentSurahNumber, curre
 {
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( cleanHtmlContent( rdrview ) );
+	const $ = cheerio.load( rdrview );
 
 	$( "header" ).before( "<br>BOLDTEXT" );
 	$( "p" ).before( "<br>" );

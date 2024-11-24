@@ -10,7 +10,7 @@ async function fetchHtml ( url )
 	const cachedHtml = await database.getHtmlCache( url );
 	if ( cachedHtml )
 	{
-		return cachedHtml;
+		return cleanHtmlContent( cachedHtml );
 	}
 
 	try
@@ -21,7 +21,7 @@ async function fetchHtml ( url )
 		// Store in cache
 		await database.putHtmlCache( url, htmlContent );
 
-		return htmlContent;
+		return cleanHtmlContent( htmlContent );
 	}
 	catch ( error )
 	{
@@ -36,18 +36,20 @@ async function getReadabilityOutput ( url )
 	const cachedHtml = await database.getHtmlCache( url );
 	if ( cachedHtml )
 	{
-		return cachedHtml;
+		return cleanHtmlContent( cachedHtml );
 	}
 
 	try
 	{
-		const response = await axios.get( url );
-		const htmlContent = response.data;
+		const dom = await JSDOM.fromURL( url );
+		const reader = new Readability( dom.window.document );
+		const article = reader.parse();
+		const htmlContent = article.content;
 
 		// Store in cache
 		await database.putHtmlCache( url, htmlContent );
 
-		return htmlContent;
+		return cleanHtmlContent( htmlContent );
 	}
 	catch ( error )
 	{
@@ -63,6 +65,5 @@ function cleanHtmlContent ( htmlString )
 
 module.exports = {
 	fetchHtml,
-	getReadabilityOutput,
-	cleanHtmlContent
+	getReadabilityOutput
 };
