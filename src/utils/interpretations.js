@@ -106,6 +106,8 @@ exports.generateKhameneiMessage = async function ( verseRefIndex, part )
 		currentSurahPersianNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
+	console.log( url );
+
 	const rdrview = await getReadabilityOutput( url );
 	const $ = cheerio.load( cleanHtmlContent( rdrview ) );
 
@@ -113,9 +115,10 @@ exports.generateKhameneiMessage = async function ( verseRefIndex, part )
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 	fishTexts.push( normalizeMessage( headerText ) );
 
-	$( "article" ).before( "<br>" );
+	$( "header" ).before( "<br>BOLDTEXT" );
 	$( "p" ).before( "<br>" );
-	$( "br" ).replaceWith( "\n\n" );
+	$( "br" ).replaceWith( "BREAKLINE" );
+	$( "hr" ).replaceWith( "FOOTERLINE" );
 	const fishChunk = $( "#npTL" ).text().trim();
 
 	if ( fishChunk )
@@ -125,7 +128,26 @@ exports.generateKhameneiMessage = async function ( verseRefIndex, part )
 		const partText = fishChunk.substring( startPos, endPos );
 		if ( partText )
 		{
-			fishTexts.push( normalizeMessage( partText ) );
+			// Modify this part to handle headers
+			let lines = partText.split( "BREAKLINE" );
+			// some lines are empty, so we need to filter them out
+			lines = lines.filter( line => { return line.trim() !== "" });
+			const processedLines = lines.map( line =>
+			{
+				line = line.trim();
+				if ( line.includes( "BOLDTEXT" ) )
+				{
+					line = line.replace( "BOLDTEXT", "" );
+					return normalizeMessage( `\n📝 ${markdownCodes.bold}${line.trim()}${markdownCodes.bold}\n` );
+				}
+				else if ( line.includes( "FOOTERLINE" ) )
+				{
+					return normalizeMessage( "\n🔖 ارجاعات" );
+				}
+				return normalizeMessage( line );
+			});
+
+			fishTexts.push( processedLines.join( "\n" ) );
 		}
 	}
 
