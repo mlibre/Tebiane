@@ -14,7 +14,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		message_id: messageId,
 		parse_mode: "MarkdownV2"
 	}
-	let { actionCode, previousActionCode, lastTranslaction, readCode, refIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
+	let { actionCode, previousActionCode, lastTranslaction, readStatusCode, searchResultIndexes, refIndex, verseRefIndex } = parseCallbackData( input );
 
 	const userOtions = {
 		actionCode,
@@ -30,7 +30,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		})
 	}
@@ -53,7 +53,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		});
 	}
@@ -76,43 +76,43 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		});
 	}
 	else if ( actionCodes.nextResult === actionCode ) // next result
 	{
-		const refIndexPosition = refIndexes.indexOf( refIndex );
-		if ( refIndexPosition + 1 < refIndexes.length )
+		const refIndexPosition = searchResultIndexes.indexOf( refIndex );
+		if ( refIndexPosition + 1 < searchResultIndexes.length )
 		{
-			refIndex = refIndexes[refIndexPosition + 1];
+			refIndex = searchResultIndexes[refIndexPosition + 1];
 		}
 		const message = generateMessage( refIndex, userOtions.lastTranslaction );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( refIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		})
 	}
 	else if ( actionCodes.prevResult === actionCode ) // previous result
 	{
-		const refIndexPosition = refIndexes.indexOf( refIndex );
+		const refIndexPosition = searchResultIndexes.indexOf( refIndex );
 		if ( refIndexPosition - 1 >= 0 )
 		{
-			refIndex = refIndexes[refIndexPosition - 1];
+			refIndex = searchResultIndexes[refIndexPosition - 1];
 		}
 		const message = generateMessage( refIndex, userOtions.lastTranslaction );
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( refIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( refIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		})
 	}
 	else if ( actionCodes.tafsirNemooneh.indexOf( actionCode ) != -1 ) // tafsir nemuneh
 	{
-		if ( readCode === actionCodes.toggleRead )
+		if ( readStatusCode === actionCodes.toggleRead )
 		{
 			if ( await database.getTafsir( `${chatId}${verseRefIndex}` ) )
 			{
@@ -127,7 +127,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		})
 	}
@@ -137,14 +137,14 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		});
 	}
 	else if ( actionCodes.khamenei.indexOf( actionCode ) != -1 )
 	{
 		// Replace in the khamenei section:
-		if ( readCode === actionCodes.toggleRead )
+		if ( readStatusCode === actionCodes.toggleRead )
 		{
 			if ( await database.getKhamenei( `${chatId}${verseRefIndex}` ) )
 			{
@@ -159,7 +159,7 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		});
 	}
@@ -170,11 +170,11 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 		await editMessageWithRetry( bot, message, {
 			...messageOptions,
 			reply_markup: {
-				inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		})
 		// const replyMerkup = {
-		// 	inline_keyboard: await genButtons( verseRefIndex, refIndex, refIndexes, userOtions )
+		// 	inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 		// }
 		// await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
 		// 	...messageOptions
@@ -191,10 +191,10 @@ function parseCallbackData ( input )
 	const actionCode = input[0];
 	const previousActionCode = input[1];
 	const lastTranslaction = input[2];
-	const readCode = input[3];
-	const [verseRefIndexStr, refIndexesStr] = input.slice( 4 ).split( "_" );
+	const readStatusCode = input[3];
+	const [verseRefIndexStr, searchResultIndexesStr] = input.slice( 4 ).split( "_" );
 	let refIndex = -1;
-	const refIndexes = refIndexesStr.split( "," ).map( ( num, index ) =>
+	const searchResultIndexes = searchResultIndexesStr.split( "," ).map( ( num, index ) =>
 	{
 		const tmp = parseInt( num.replace( "@", "" ), 10 );
 		if ( num.includes( "@" ) )
@@ -203,5 +203,5 @@ function parseCallbackData ( input )
 		}
 		return tmp;
 	});
-	return { actionCode, previousActionCode, lastTranslaction, readCode, refIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
+	return { actionCode, previousActionCode, lastTranslaction, readStatusCode, searchResultIndexes, refIndex, verseRefIndex: parseInt( verseRefIndexStr ) };
 }
