@@ -1,12 +1,9 @@
 const quran = require( "../sources/quran.json" );
-const {
-	generateMessage,
-	editMessageWithRetry,
-	editMessageReplyMarkupWithRetry,
-	generateTafsirNemunehMessage,
-	genButtons,
-	generateSaanNuzulMessage,
-	generateKhameneiMessage } = require( "./utils" );
+const { genButtons } = require( "./utils/button-generator" );
+const { generateMessage } = require( "./utils/message-generator" );
+const { editMessageWithRetry, editMessageReplyMarkupWithRetry } = require( "./utils/telegram-helpers" );
+const { generateSaanNuzulMessage, generateKhameneiMessage, generateTafsirNemunehMessage } = require( "./utils/interpretations" );
+
 const { all_translations, actionCodes } = require( "./configs" )
 const database = require( "./database" );
 

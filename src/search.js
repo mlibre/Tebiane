@@ -1,4 +1,7 @@
-const { generateMessage, genButtons, sendMessageWithRetry } = require( "./utils" );
+const { genButtons } = require( "./utils/button-generator" );
+const { generateMessage } = require( "./utils/message-generator" );
+const { sendMessageWithRetry } = require( "./utils/telegram-helpers" );
+
 const database = require( "./database" );
 const config = require( "./configs" );
 

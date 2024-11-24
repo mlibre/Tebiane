@@ -1,6 +1,6 @@
 const fs = require( "fs" );
 const path = require( "path" );
-const { sendMessageWithRetry } = require( "./utils" );
+const { sendMessageWithRetry } = require( "./utils/telegram-helpers" );
 const resources = fs.readFileSync( path.join( __dirname, "../sources/sources.txt" ) );
 
 module.exports = async function all ( bot, msg, match )
