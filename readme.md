@@ -60,7 +60,7 @@ mv .env.example .env
 ```env
 TELEGRAM_BOT_TOKEN=توکن-ربات-شما
 PROXY=http://127.0.0.1:2081
-STORAGE_PATH=./storage
+STORAGE_PATH=storage
 ```
 
 ### اجرای پروژه
