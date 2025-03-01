@@ -32,7 +32,7 @@ exports.generateSaanNuzulMessage = async function ( verseRefIndex )
 	}
 	else
 	{
-		saanNuzulTexts.push( normalizeMessage( "سبب نزولی برای این آیه پیدا نشد." ) );
+		saanNuzulTexts.push( normalizeMessage( "شان نزولی برای این آیه پیدا نشد." ) );
 	}
 
 	saanNuzulTexts.push( `[🔗 لینک به وب سایت اهل البیت](${url})` );
