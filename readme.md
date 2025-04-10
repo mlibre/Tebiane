@@ -86,7 +86,7 @@ cd cfw
 # curl -X POST "https://api.telegram.org/botENV_BOT_TOKEN/setWebhook" \
 #   -H "Content-Type: application/json" \
 #   -d '{
-#         "url": "https://cfw-tebiane.mlibrego.workers.dev/",
+#         "url": "https://cfw-tebiane.mlibrego.workers.dev/endpoint",
 #         "secret_token": "MySecret123"
 #       }'
 
