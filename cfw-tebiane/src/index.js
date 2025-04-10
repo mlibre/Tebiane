@@ -66,7 +66,7 @@ async function onUpdate ( update, TOKEN )
  */
 function onMessage ( message, TOKEN )
 {
-	return sendPlainText( message.chat.id, `Echo:\n${ message.text}`, TOKEN );
+	return sendPlainText( message.chat.id, `Echo2:\n${ message.text}`, TOKEN );
 }
 
 /**

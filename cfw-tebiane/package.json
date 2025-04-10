@@ -1,6 +1,6 @@
 {
 	"name": "cfw-tebiane",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
@@ -10,7 +10,6 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
-		"vitest": "~3.0.7",
 		"wrangler": "^4.9.1"
 	}
 }
