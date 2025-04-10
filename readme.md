@@ -77,7 +77,7 @@ node src/main.js
 ## Deploy On Cloudflare Workers
 
 ```bash
-cd cfw-tebiane
+cd cfw
 
 # take bot token from @BotFather for ENV_BOT_TOKEN
 # send /token to @BotFather
@@ -97,9 +97,6 @@ nano wrangler.jsonc
   "ENV_BOT_TOKEN": "ENV_BOT_TOKEN",
   "ENV_BOT_SECRET": "MySecret123",
 },
-
-# Optional: On the Worker page in cloudflare, Click on "Configure worker" -> "Settings" -> "Variables"
-# Optional: Add ENV_BOT_TOKEN and ENV_BOT_SECRET
 
 npx wrangler deploy
 
