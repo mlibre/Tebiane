@@ -90,9 +90,18 @@ cd cfw
 #         "secret_token": "MySecret123"
 #       }'
 
+# Storage & Databases -> KV
+# create KV Namespace: CFW_TEBIANE
+# copy the ID of KV Namespace
 
 nano wrangler.jsonc
 
+"kv_namespaces": [
+  {
+    "binding": "CFW_TEBIANE",
+    "id": "4195093e69a74a46bb405e5f79e2ed95"
+  }
+],
 "vars": {
   "ENV_BOT_TOKEN": "ENV_BOT_TOKEN",
   "ENV_BOT_SECRET": "MySecret123",
