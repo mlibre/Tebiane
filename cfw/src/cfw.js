@@ -1,7 +1,3 @@
-/**
- * Telegram Bot Cloudflare Worker
- * https://github.com/cvzi/telegram-bot-cloudflare
- */
 
 const WEBHOOK = "/endpoint";
 const SECRET = "MySecret123";
