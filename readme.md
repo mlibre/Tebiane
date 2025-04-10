@@ -73,3 +73,35 @@ npm start
 # یا به صورت مستقیم فایل اصلی رو اجرا کنید
 node src/main.js
 ```
+
+## Deploy On Cloudflare Workers
+
+```bash
+cd cfw-tebiane
+
+# take bot token from @BotFather for ENV_BOT_TOKEN
+# send /token to @BotFather
+
+# take bot secret from https://core.telegram.org/bots/api#setwebhook for ENV_BOT_SECRET
+# curl -X POST "https://api.telegram.org/botENV_BOT_TOKEN/setWebhook" \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#         "url": "https://cfw-tebiane.mlibrego.workers.dev/",
+#         "secret_token": "MySecret123"
+#       }'
+
+
+nano wrangler.jsonc
+
+"vars": {
+  "ENV_BOT_TOKEN": "ENV_BOT_TOKEN",
+  "ENV_BOT_SECRET": "MySecret123",
+},
+
+# Optional: On the Worker page in cloudflare, Click on "Configure worker" -> "Settings" -> "Variables"
+# Optional: Add ENV_BOT_TOKEN and ENV_BOT_SECRET
+
+npx wrangler deploy
+
+# Open https://cfw-tebiane.mlibrego.workers.dev/registerWebhook
+```
