@@ -5,7 +5,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cfw-tebiane",
-	"main": "src/index.js",
+	"main": "src/cfw.js",
 	"compatibility_date": "2025-04-10",
 	"observability": {
 		"enabled": true
