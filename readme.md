@@ -92,7 +92,8 @@ cd cfw
 
 # Storage & Databases -> KV
 # create KV Namespace: CFW_TEBIANE
-# copy the ID of KV Namespace
+# create a "quran" key in the namespace with the value of the quran.json content
+# Copy the ID of KV Namespace
 
 nano wrangler.jsonc
 
