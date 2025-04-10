@@ -4,14 +4,20 @@
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev"
+		"dev": "wrangler dev --local",
+		"start": "wrangler dev --local",
+		"build-quran": "node scripts/merging_quran_translations.js"
+	},
+	"dependencies": {
+		"@mozilla/readability": "^0.6.0",
+		"cheerio": "^1.0.0",
+		"fuse.js": "^7.0.0",
+		"jsdom": "^25.0.1",
+		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
+		"eslint": "^9.4.0",
 		"wrangler": "^4.9.1"
-	},
-	"dependencies": {
-		"cheerio": "^1.0.0"
 	}
 }

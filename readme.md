@@ -105,6 +105,7 @@ nano wrangler.jsonc
 "vars": {
   "ENV_BOT_TOKEN": "ENV_BOT_TOKEN",
   "ENV_BOT_SECRET": "MySecret123",
+  "DEFAULT_TRANSLATION": "f"
 },
 
 npx wrangler deploy
