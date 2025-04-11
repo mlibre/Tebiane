@@ -149,11 +149,6 @@ export default class TelegramClient
 		await this.sendMessageWithRetry( chatId, resourcesMessage, { parse_mode: "MarkdownV2" });
 	}
 
-	validateWebhookRequest ( secretHeader )
-	{
-		return !this.secretToken || secretHeader === this.secretToken;
-	}
-
 	async search ( text, chatId, messageId )
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
@@ -201,6 +196,11 @@ export default class TelegramClient
 	{
 		const response = await this.makeRequest( "setWebhook", { url: "" });
 		return response.ok === true;
+	}
+
+	validateWebhookRequest ( secretHeader )
+	{
+		return !this.secretToken || secretHeader === this.secretToken;
 	}
 
 	isNetworkError ( error )
