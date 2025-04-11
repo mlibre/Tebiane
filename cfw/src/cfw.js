@@ -1,9 +1,7 @@
 const Fuse = require( "fuse.js" );
-const util = require( "node:util" );
 
 import KVNamespace from "./kvNamespace.js";
 import TelegramClient from "./telegram-api.js";
-// const search = require("./search");
 // const callback = require("./callback");
 import {
 	fuseKeys,
@@ -36,8 +34,6 @@ export default {
 			return new Response( "KV Namespace not configured", { status: 500 });
 		}
 		globalThis.kvNamespace = kvNamespace;
-
-		const telegramClient = new TelegramClient( token, SECRET );
 
 		// Load Quran data once per worker instance (or fetch if not loaded)
 		// Simple in-memory cache for the Quran data within this worker instance
@@ -72,6 +68,8 @@ export default {
 			threshold: 0.5,
 			keys: fuseKeys
 		}, fuseIndex );
+
+		const telegramClient = new TelegramClient( token, SECRET, fuse );
 
 		const url = new URL( request.url );
 		if ( url.pathname === WEBHOOK )
