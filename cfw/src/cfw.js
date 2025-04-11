@@ -2,7 +2,6 @@ const Fuse = require( "fuse.js" );
 
 import KVNamespace from "./kvNamespace.js";
 import TelegramClient from "./telegram-api.js";
-// const callback = require("./callback");
 import {
 	fuseKeys,
 	markdownCodes,
