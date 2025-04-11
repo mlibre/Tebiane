@@ -6,29 +6,6 @@ import TelegramClient from "./telegram-api.js";
 // const search = require("./search");
 // const callback = require("./callback");
 
-const fuseKeys = [
-	{ name: "surah.number", weight: 1 }, // 1
-	{ name: "surah.persian_number", weight: 1 }, // ۱
-	{ name: "surah.arabic", weight: 1.2 }, // ٱلْفَاتِحَة
-	{ name: "surah.farsi", weight: 1.2 }, // فاتحه
-	{ name: "ayah", weight: 1.2 }, // 1
-	{ name: "ayah_persian", weight: 1.2 }, // ۱
-	{ name: "verse.farsi_makarem", weight: 1 },
-	{ name: "verse.farsi_ansarian", weight: 1 },
-	{ name: "verse.farsi_fooladvand", weight: 1 },
-	{ name: "verse.farsi_mojtabavi", weight: 1 },
-	{ name: "verse.arabic_clean", weight: 1 }, // بسم الله الرحمن الرحيم
-	{ name: "verse.arabic_enhanced", weight: 1 }, // بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-	{ name: "id", weight: 0.05 }, // 1
-	{ name: "id_persian", weight: 0.05 }, // ۱
-];
-
-const MESSAGE_LENGTH_LIMIT = 2100;
-const CACHE_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for HTML cache
-const KV_QURAN_KEY = "quran"; // Key for Quran data in KV
-const WEBHOOK = "/endpoint";
-const SECRET = "MySecret123";
-
 export default {
 	async fetch ( request, env, ctx )
 	{
