@@ -8,10 +8,6 @@ const callback = require( "./callback" );
 
 const { botOptions, token } = require( "./configs" );
 const bot = new TelegramBot( token, botOptions );
-// const fuseKeys = ["surah.number", "surah.persian_number",
-// 	"surah.arabic", "surah.farsi", "ayah", "ayah_persian",
-// 	"verse.farsi_makarem", "verse.farsi_ansarian", "verse.farsi_fooladvand",
-// 	"verse.farsi_mojtabavi", "verse.arabic_clean", "verse.arabic_enhanced", "id", "id_persian"]
 
 const fuseKeys = [
 	{ name: "surah.number", weight: 1 }, // 1
@@ -20,10 +16,10 @@ const fuseKeys = [
 	{ name: "surah.farsi", weight: 1.2 }, // فاتحه
 	{ name: "ayah", weight: 1.2 }, // 1
 	{ name: "ayah_persian", weight: 1.2 }, // ۱
-	{ name: "verse.farsi_makarem", weight: 1 }, // به نام خداوند بخشنده بخشایشگر
-	{ name: "verse.farsi_ansarian", weight: 1 }, // به نام خدا که رحمتش بی‌اندازه است و مهربانی‌اش همیشگی
-	{ name: "verse.farsi_fooladvand", weight: 1 }, // به نام خداوند رحمتگر مهربان
-	{ name: "verse.farsi_mojtabavi", weight: 1 }, // به نام خداى بخشاينده مهربان
+	{ name: "verse.farsi_makarem", weight: 1 },
+	{ name: "verse.farsi_ansarian", weight: 1 },
+	{ name: "verse.farsi_fooladvand", weight: 1 },
+	{ name: "verse.farsi_mojtabavi", weight: 1 },
 	{ name: "verse.arabic_clean", weight: 1 }, // بسم الله الرحمن الرحيم
 	{ name: "verse.arabic_enhanced", weight: 1 }, // بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
 	{ name: "id", weight: 0.05 }, // 1
