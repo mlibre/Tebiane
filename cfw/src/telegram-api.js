@@ -111,18 +111,7 @@ export default class TelegramClient
 		);
 	}
 
-	async setWebhook ( webhookUrl, secretToken = this.secretToken )
-	{
-		return await this.makeRequest( "setWebhook", {
-			url: webhookUrl,
-			secret_token: secretToken
-		});
-	}
 
-	async deleteWebhook ()
-	{
-		return await this.makeRequest( "setWebhook", { url: "" });
-	}
 
 	async handleUpdate ( update )
 	{
@@ -168,18 +157,7 @@ export default class TelegramClient
 		return !this.secretToken || secretHeader === this.secretToken;
 	}
 
-	async registerWebhook ( requestUrl, suffix )
-	{
-		const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-		const response = await this.setWebhook( webhookUrl );
-		return "ok" in response && response.ok;
-	}
 
-	async unRegisterWebhook ()
-	{
-		const response = await this.deleteWebhook();
-		return "ok" in response && response.ok;
-	}
 
 	async search ( text, chatId, messageId )
 	{
@@ -212,6 +190,32 @@ export default class TelegramClient
 		{
 			await this.sendMessageWithRetry( chatId, "نتیجه ای یافت نشد!" );
 		}
+	}
+
+	async registerWebhook ( requestUrl, suffix )
+	{
+		const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
+		const response = await this.setWebhook( webhookUrl );
+		return "ok" in response && response.ok;
+	}
+
+	async unRegisterWebhook ()
+	{
+		const response = await this.deleteWebhook();
+		return "ok" in response && response.ok;
+	}
+
+	async setWebhook ( webhookUrl, secretToken = this.secretToken )
+	{
+		return await this.makeRequest( "setWebhook", {
+			url: webhookUrl,
+			secret_token: secretToken
+		});
+	}
+
+	async deleteWebhook ()
+	{
+		return await this.makeRequest( "setWebhook", { url: "" });
 	}
 
 	isNetworkError ( error )
