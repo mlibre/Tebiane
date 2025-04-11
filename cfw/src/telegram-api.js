@@ -12,8 +12,6 @@ export default class TelegramClient
 		this.fuse = fuse;
 	}
 
-
-
 	async withRetry ( operation, options, retries = 10, delay = 50 )
 	{
 		for ( let i = 0; i < retries; i++ )
@@ -60,17 +58,14 @@ export default class TelegramClient
 
 	async sendMessageWithRetry ( chatId, message, options = {})
 	{
-		return await this.withRetry(
-			() =>
-			{
-				return this.makeRequest( "sendMessage", {
-					chat_id: chatId,
-					text: message,
-					...options
-				})
-			},
-			options
-		);
+		return await this.withRetry( () =>
+		{
+			return this.makeRequest( "sendMessage", {
+				chat_id: chatId,
+				text: message,
+				...options,
+			});
+		}, options );
 	}
 
 	async editMessageWithRetry ( message, options = {})
@@ -80,16 +75,13 @@ export default class TelegramClient
 			throw new Error( "chat_id and message_id are required for editMessageText" );
 		}
 
-		return await this.withRetry(
-			() =>
-			{
-				return this.makeRequest( "editMessageText", {
-					text: message,
-					...options
-				})
-			},
-			options
-		);
+		return await this.withRetry( () =>
+		{
+			return this.makeRequest( "editMessageText", {
+				text: message,
+				...options,
+			});
+		}, options );
 	}
 
 	async editMessageReplyMarkupWithRetry ( replyMarkup, options = {})
@@ -99,19 +91,14 @@ export default class TelegramClient
 			throw new Error( "chat_id and message_id are required for editMessageReplyMarkup" );
 		}
 
-		return await this.withRetry(
-			() =>
-			{
-				return this.makeRequest( "editMessageReplyMarkup", {
-					reply_markup: replyMarkup,
-					...options
-				})
-			},
-			options
-		);
+		return await this.withRetry( () =>
+		{
+			return this.makeRequest( "editMessageReplyMarkup", {
+				reply_markup: replyMarkup,
+				...options,
+			});
+		}, options );
 	}
-
-
 
 	async handleUpdate ( update )
 	{
@@ -157,8 +144,6 @@ export default class TelegramClient
 		return !this.secretToken || secretHeader === this.secretToken;
 	}
 
-
-
 	async search ( text, chatId, messageId )
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
@@ -195,34 +180,24 @@ export default class TelegramClient
 	async registerWebhook ( requestUrl, suffix )
 	{
 		const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-		const response = await this.setWebhook( webhookUrl );
-		return "ok" in response && response.ok;
+		const response = await this.makeRequest( "setWebhook", {
+			url: webhookUrl,
+			secret_token: this.secretToken,
+		});
+		return response.ok === true;
 	}
 
 	async unRegisterWebhook ()
 	{
-		const response = await this.deleteWebhook();
-		return "ok" in response && response.ok;
-	}
-
-	async setWebhook ( webhookUrl, secretToken = this.secretToken )
-	{
-		return await this.makeRequest( "setWebhook", {
-			url: webhookUrl,
-			secret_token: secretToken
-		});
-	}
-
-	async deleteWebhook ()
-	{
-		return await this.makeRequest( "setWebhook", { url: "" });
+		const response = await this.makeRequest( "setWebhook", { url: "" });
+		return response.ok === true;
 	}
 
 	isNetworkError ( error )
 	{
 		return error.message.includes( "socket hang up" ) ||
-           error.message.includes( "network socket disconnected" ) ||
-           error.message.includes( "fetch failed" );
+      error.message.includes( "network socket disconnected" ) ||
+      error.message.includes( "fetch failed" );
 	}
 
 	async sleep ( ms )
