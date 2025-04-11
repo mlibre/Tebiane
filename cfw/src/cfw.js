@@ -102,7 +102,7 @@ async function handleWebhook ( request, ctx, telegramClient )
 
 	const update = await request.json();
 	ctx.waitUntil( telegramClient.handleUpdate( update ) );
-	return new Response( "Ok" );
+	return new Response( true );
 }
 
 // Specific KV functions replacing database.js
