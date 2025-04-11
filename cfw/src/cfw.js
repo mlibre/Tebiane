@@ -3,7 +3,6 @@ const util = require( "node:util" );
 
 import KVNamespace from "./kvNamespace.js";
 import TelegramClient from "./telegram-api.js";
-// const resources = require("./resources");
 // const search = require("./search");
 // const callback = require("./callback");
 
@@ -91,11 +90,13 @@ export default {
 		}
 		else if ( url.pathname === "/registerWebhook" )
 		{
-			return registerWebhook( request, url, WEBHOOK, telegramClient );
+			const success = await telegramClient.registerWebhook( url, WEBHOOK );
+			return new Response( success );
 		}
 		else if ( url.pathname === "/unRegisterWebhook" )
 		{
-			return unRegisterWebhook( telegramClient );
+			const success = await telegramClient.unRegisterWebhook();
+			return new Response( success );
 		}
 		else
 		{
@@ -117,19 +118,6 @@ async function handleWebhook ( request, ctx, telegramClient )
 	log( update );
 	ctx.waitUntil( telegramClient.handleUpdate( update ) );
 	return new Response( "Ok" );
-}
-
-async function registerWebhook ( request, requestUrl, suffix, telegramClient )
-{
-	const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-	const response = await telegramClient.setWebhook( webhookUrl );
-	return new Response( "ok" in response && response.ok ? "Ok" : JSON.stringify( response, null, 2 ) );
-}
-
-async function unRegisterWebhook ( telegramClient )
-{
-	const response = await telegramClient.deleteWebhook();
-	return new Response( "ok" in response && response.ok ? "Ok" : JSON.stringify( response, null, 2 ) );
 }
 
 // Specific KV functions replacing database.js

@@ -164,4 +164,17 @@ export default class TelegramClient
 	{
 		return !this.secretToken || secretHeader === this.secretToken;
 	}
+
+	async registerWebhook ( requestUrl, suffix )
+	{
+		const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
+		const response = await this.setWebhook( webhookUrl );
+		return "ok" in response && response.ok;
+	}
+
+	async unRegisterWebhook ()
+	{
+		const response = await this.deleteWebhook();
+		return "ok" in response && response.ok;
+	}
 }
