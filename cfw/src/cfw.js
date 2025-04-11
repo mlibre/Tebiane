@@ -54,16 +54,25 @@ export default {
 		// Simple in-memory cache for the Quran data within this worker instance
 		if ( !globalThis.quranData )
 		{
-			console.log( "Loading Quran data from KV..." );
 			globalThis.quranData = await kvNamespace.getJson( KV_QURAN_KEY );
 			if ( !globalThis.quranData )
 			{
 				console.error( "Failed to load Quran data from KV!" );
 				return new Response( "Failed to load Quran data", { status: 500 });
 			}
-			console.log( `Quran data loaded successfully (${globalThis.quranData.length} verses).` );
+			console.log( `Quran data loaded successfully (${globalThis.quranData.length} verses)` );
 		}
-		const { quranData } = globalThis;
+		if ( !globalThis.sources )
+		{
+			globalThis.sources = await kvNamespace.getText( "sources" );
+			if ( !globalThis.sources )
+			{
+				console.error( "Failed to load sources data from KV!" );
+				return new Response( "Failed to load sources data", { status: 500 });
+			}
+			console.log( `Sources data loaded successfully (${globalThis.sources})` );
+		}
+		const { quranData, sources } = globalThis;
 
 		const fuseIndex = Fuse.createIndex( fuseKeys, quranData )
 		const fuse = new Fuse( quranData, {

@@ -131,10 +131,33 @@ export default class TelegramClient
 
 	async handleUpdate ( update )
 	{
-		if ( "message" in update )
+		if ( "message" in update && update.message.text )
 		{
-			await this.sendMessageWithRetry( update.message.chat.id, `Echo3:\n${update.message.text}` );
+			const { text } = update.message;
+			const chatId = update.message.chat.id;
+
+			// Check if the message is asking for resources
+			if ( text.startsWith( "/resources" ) )
+			{
+				await this.sendAllResources( chatId );
+				return;
+			}
+
+			// Default echo response
+			await this.sendMessageWithRetry( chatId, `Echo3:\n${text}` );
 		}
+	}
+
+	async sendAllResources ( chatId )
+	{
+		if ( !globalThis.sources )
+		{
+			await this.sendMessageWithRetry( chatId, "منابع در دسترس نیست" );
+			return;
+		}
+
+		const resourcesMessage = `\`\`\`text\n${globalThis.sources}\`\`\``;
+		await this.sendMessageWithRetry( chatId, resourcesMessage, { parse_mode: "MarkdownV2" });
 	}
 
 	validateWebhookRequest ( secretHeader )
