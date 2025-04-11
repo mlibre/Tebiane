@@ -2,6 +2,7 @@ const Fuse = require( "fuse.js" );
 const util = require( "node:util" );
 
 import KVNamespace from "./kvNamespace.js";
+import TelegramClient from "./telegram-api.js";
 // const resources = require( "./resources" );
 // const search = require( "./search" );
 // const callback = require( "./callback" );
@@ -40,11 +41,14 @@ export default {
 			return new Response( "Bot token not configured", { status: 500 });
 		}
 		globalThis.token = token;
+
 		if ( !kvNamespace )
 		{
 			return new Response( "KV Namespace not configured", { status: 500 });
 		}
 		globalThis.kvNamespace = kvNamespace;
+
+		const telegramClient = new TelegramClient( token, SECRET );
 
 		// Load Quran data once per worker instance (or fetch if not loaded)
 		// Simple in-memory cache for the Quran data within this worker instance
@@ -74,7 +78,7 @@ export default {
 		const url = new URL( request.url );
 		if ( url.pathname === WEBHOOK )
 		{
-			return handleWebhook( request, ctx );
+			return handleWebhook( request, ctx, telegramClient );
 		}
 		else if ( url.pathname === "/registerWebhook" )
 		{
@@ -91,7 +95,7 @@ export default {
 	},
 };
 
-async function handleWebhook ( request, ctx )
+async function handleWebhook ( request, ctx, telegramClient )
 {
 	if ( request.headers.get( "X-Telegram-Bot-Api-Secret-Token" ) !== SECRET )
 	{
