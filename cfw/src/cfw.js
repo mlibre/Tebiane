@@ -104,8 +104,6 @@ async function handleWebhook ( request, ctx, telegramClient )
 	}
 
 	const update = await request.json();
-	// message: { \N	    message_id: 1130, \N	    from: { \N	      id: 354242641, \N	      is_bot: false, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      language_code: 'en' \N	    }, \N	    chat: { \N	      id: 354242641, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      type: 'private' \N	    }, \N	    date: 1744371005, \N	    text: 'سلام' \N	  } \N	} \N		{ \N	  update_id: 275201116, \N	  callback_query: { \N	    id: '1521460559992070096', \N	    from: { \N	      id: 354242641, \N	      is_bot: false, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      language_code: 'en' \N	    }, \N	    message: { \N	      message_id: 1051, \N	      from: { \N	        id: 7282644891, \N	        is_bot: true, \N	        first_name: 'تبیان - قرآن و تفسیر', \N	        username: 'TebianeBot' \N	      }, \N	      chat: { \N	        id: 354242641, \N	        first_name: 'Масуд', \N	        username: 'mlibre', \N	        type: 'private' \N	      }, \N	      date: 1732468708, \N	      edit_date: 1740855132, \N	      text: ' ٱلْفَاتِحَة 🕊️ فیش های رهبری 📖 ۱:۴\n' + \N	        '🔗 لینک به وب سایت', \N	      reply_markup: { \N	        inline_keyboard: [ \N	          [ \N	            { \N	              text: 'فیش های رهبری', \N	              callback_data: 'DEfB3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [ \N	            { text: '5', callback_data: 'HEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '4', callback_data: 'GEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '3', callback_data: 'FEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '✅ 2', callback_data: 'EEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '1', callback_data: 'DEfB3_@0,1,2,3,4,5,6,3936' }, \N	            [length]: 5 \N	          ], \N	          [ \N	            { \N	              text: 'مطالعه نشده', \N	              callback_data: 'EEfA3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [ \N	            { \N	              text: 'صفحه ی اصلی', \N	              callback_data: 'xEfB3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [length]: 4 \N	        ] \N	      } \N	    }, \N	    chat_instance: '589297763605737593', \N	    data: 'DEfB3_@0,1,2,3,4,5,6,3936' \N	  } \N	}
-	log( update );
 	ctx.waitUntil( telegramClient.handleUpdate( update ) );
 	return new Response( "Ok" );
 }
@@ -154,9 +152,4 @@ async function fetchHtmlWithCache ( url, kvNamespace )
 		console.error( `Error fetching HTML from ${url}:`, error );
 		throw error; // Re-throw to be handled by caller
 	}
-}
-
-function log ( update )
-{
-	console.log( util.inspect( update, { showHidden: true, depth: null }) );
 }
