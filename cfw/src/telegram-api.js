@@ -131,8 +131,9 @@ export default class TelegramClient
 			const { data } = update.callback_query; // 'k1475_@1463,6155,106,1053,2000,6149,392,592'
 			const chatId = update.callback_query.message.chat.id
 			const messageId = update.callback_query.message.message_id
-			// return await callback( bot, data, chatId, messageId );
+			// await callback( bot, data, chatId, messageId );
 			this.log( "hey", data, chatId, messageId );
+			return;
 		}
 	}
 
