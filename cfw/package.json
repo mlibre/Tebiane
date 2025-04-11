@@ -1,6 +1,6 @@
 {
 	"name": "cfw-tebiane",
-	"version": "0.0.5",
+	"version": "0.0.7",
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
@@ -9,6 +9,7 @@
 		"build-quran": "node scripts/merging_quran_translations.js"
 	},
 	"dependencies": {
+		"fuse.js": "^7.1.0",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {

@@ -48,9 +48,7 @@ const arabic_texts = {
 const all_translations = { ...perian_translations, ...arabic_texts };
 
 // Other constants
-const MESSAGE_LENGTH_LIMIT = 4000; // Reduced slightly from Telegram max 4096 for safety
-const CACHE_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for HTML cache
-const KV_QURAN_KEY = "quran"; // Key for Quran data in KV
+
 
 // --- Text Helpers ---
 
@@ -578,119 +576,6 @@ async function answerCallbackQuery ( callbackQueryId, options, token )
 	}
 }
 
-
-// --- KV Store Helpers ---
-
-async function getKvJson ( kvNamespace, key )
-{
-	try
-	{
-		return await kvNamespace.get( key, "json" );
-	}
-	catch ( e )
-	{
-		console.error( `Error getting JSON from KV (${key}):`, e );
-		return null;
-	}
-}
-
-async function getKvText ( kvNamespace, key )
-{
-	try
-	{
-		return await kvNamespace.get( key, "text" );
-	}
-	catch ( e )
-	{
-		console.error( `Error getting text from KV (${key}):`, e );
-		return null;
-	}
-}
-
-
-async function putKvJson ( kvNamespace, key, value, ttl = null )
-{
-	try
-	{
-		const options = ttl ? { expirationTtl: ttl } : {};
-		await kvNamespace.put( key, JSON.stringify( value ), options );
-	}
-	catch ( e )
-	{
-		console.error( `Error putting JSON to KV (${key}):`, e );
-	}
-}
-
-async function putKvText ( kvNamespace, key, value, ttl = null )
-{
-	try
-	{
-		const options = ttl ? { expirationTtl: ttl } : {};
-		await kvNamespace.put( key, value, options );
-	}
-	catch ( e )
-	{
-		console.error( `Error putting text to KV (${key}):`, e );
-	}
-}
-
-async function deleteKv ( kvNamespace, key )
-{
-	try
-	{
-		await kvNamespace.delete( key );
-	}
-	catch ( e )
-	{
-		console.error( `Error deleting from KV (${key}):`, e );
-	}
-}
-
-// Specific KV functions replacing database.js
-const getReadStatus = async ( kv, type, chatId, verseRefIndex ) => { return await getKvJson( kv, `${type}_read_${chatId}_${verseRefIndex}` ); };
-const putReadStatus = async ( kv, type, chatId, verseRefIndex ) => { return await putKvJson( kv, `${type}_read_${chatId}_${verseRefIndex}`, true ); }; // Store simple true marker
-const deleteReadStatus = async ( kv, type, chatId, verseRefIndex ) => { return await deleteKv( kv, `${type}_read_${chatId}_${verseRefIndex}` ); };
-
-const getHtmlCache = async ( kv, url ) => { return await getKvText( kv, `cache_${url}` ); };
-const putHtmlCache = async ( kv, url, html ) => { return await putKvText( kv, `cache_${url}`, html, CACHE_TTL_SECONDS ); };
-
-// --- Web Fetching ---
-
-async function fetchHtmlWithCache ( url, kvNamespace )
-{
-	const cachedHtml = await getHtmlCache( kvNamespace, url );
-	if ( cachedHtml )
-	{
-		// console.log(`Cache hit for: ${url}`);
-		return cachedHtml;
-	}
-
-	// console.log(`Cache miss, fetching: ${url}`);
-	try
-	{
-		const response = await fetch( url, {
-			headers: { // Add a user-agent to look less like a bot
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-			}
-		});
-		if ( !response.ok )
-		{
-			throw new Error( `HTTP error! status: ${response.status} for ${url}` );
-		}
-		const htmlContent = await response.text();
-		const cleanedHtml = htmlContent.replace( /\s+/g, " " ).trim(); // Basic cleaning
-
-		// Store in cache
-		await putHtmlCache( kvNamespace, url, cleanedHtml );
-
-		return cleanedHtml;
-	}
-	catch ( error )
-	{
-		console.error( `Error fetching HTML from ${url}:`, error );
-		throw error; // Re-throw to be handled by caller
-	}
-}
 
 
 // --- Interpretation Logic ---
