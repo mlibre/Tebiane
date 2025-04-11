@@ -1,4 +1,6 @@
 const Fuse = require( "fuse.js" );
+const util = require( "node:util" );
+
 import KVNamespace from "./kvNamespace.js";
 // const resources = require( "./resources" );
 // const search = require( "./search" );
@@ -31,16 +33,18 @@ export default {
 	async fetch ( request, env, ctx )
 	{
 		const kvNamespace = new KVNamespace( env.CFW_TEBIANE ); // Instantiate KVNamespace
-		const TOKEN = env.ENV_BOT_TOKEN;
+		const token = env.ENV_BOT_TOKEN;
 
-		if ( !TOKEN )
+		if ( !token )
 		{
 			return new Response( "Bot token not configured", { status: 500 });
 		}
+		globalThis.token = token;
 		if ( !kvNamespace )
 		{
 			return new Response( "KV Namespace not configured", { status: 500 });
 		}
+		globalThis.kvNamespace = kvNamespace;
 
 		// Load Quran data once per worker instance (or fetch if not loaded)
 		// Simple in-memory cache for the Quran data within this worker instance
@@ -55,7 +59,6 @@ export default {
 			}
 			console.log( `Quran data loaded successfully (${globalThis.quranData.length} verses).` );
 		}
-		// Use the cached data
 		const { quranData } = globalThis;
 
 		const fuseIndex = Fuse.createIndex( fuseKeys, quranData )
@@ -71,15 +74,15 @@ export default {
 		const url = new URL( request.url );
 		if ( url.pathname === WEBHOOK )
 		{
-			return handleWebhook( request, TOKEN, SECRET, ctx );
+			return handleWebhook( request, ctx );
 		}
 		else if ( url.pathname === "/registerWebhook" )
 		{
-			return registerWebhook( request, url, WEBHOOK, SECRET, TOKEN );
+			return registerWebhook( request, url, WEBHOOK );
 		}
 		else if ( url.pathname === "/unRegisterWebhook" )
 		{
-			return unRegisterWebhook( TOKEN );
+			return unRegisterWebhook( );
 		}
 		else
 		{
@@ -88,7 +91,7 @@ export default {
 	},
 };
 
-async function handleWebhook ( request, TOKEN, SECRET, ctx )
+async function handleWebhook ( request, ctx )
 {
 	if ( request.headers.get( "X-Telegram-Bot-Api-Secret-Token" ) !== SECRET )
 	{
@@ -96,8 +99,9 @@ async function handleWebhook ( request, TOKEN, SECRET, ctx )
 	}
 
 	const update = await request.json();
-	ctx.waitUntil( onUpdate( update, TOKEN ) );
-
+	// message: { \N	    message_id: 1130, \N	    from: { \N	      id: 354242641, \N	      is_bot: false, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      language_code: 'en' \N	    }, \N	    chat: { \N	      id: 354242641, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      type: 'private' \N	    }, \N	    date: 1744371005, \N	    text: 'سلام' \N	  } \N	} \N		{ \N	  update_id: 275201116, \N	  callback_query: { \N	    id: '1521460559992070096', \N	    from: { \N	      id: 354242641, \N	      is_bot: false, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      language_code: 'en' \N	    }, \N	    message: { \N	      message_id: 1051, \N	      from: { \N	        id: 7282644891, \N	        is_bot: true, \N	        first_name: 'تبیان - قرآن و تفسیر', \N	        username: 'TebianeBot' \N	      }, \N	      chat: { \N	        id: 354242641, \N	        first_name: 'Масуд', \N	        username: 'mlibre', \N	        type: 'private' \N	      }, \N	      date: 1732468708, \N	      edit_date: 1740855132, \N	      text: ' ٱلْفَاتِحَة 🕊️ فیش های رهبری 📖 ۱:۴\n' + \N	        '🔗 لینک به وب سایت', \N	      reply_markup: { \N	        inline_keyboard: [ \N	          [ \N	            { \N	              text: 'فیش های رهبری', \N	              callback_data: 'DEfB3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [ \N	            { text: '5', callback_data: 'HEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '4', callback_data: 'GEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '3', callback_data: 'FEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '✅ 2', callback_data: 'EEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '1', callback_data: 'DEfB3_@0,1,2,3,4,5,6,3936' }, \N	            [length]: 5 \N	          ], \N	          [ \N	            { \N	              text: 'مطالعه نشده', \N	              callback_data: 'EEfA3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [ \N	            { \N	              text: 'صفحه ی اصلی', \N	              callback_data: 'xEfB3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [length]: 4 \N	        ] \N	      } \N	    }, \N	    chat_instance: '589297763605737593', \N	    data: 'DEfB3_@0,1,2,3,4,5,6,3936' \N	  } \N	}
+	log( update );
+	ctx.waitUntil( onUpdate( update ) );
 	return new Response( "Ok" );
 }
 
@@ -105,43 +109,34 @@ async function handleWebhook ( request, TOKEN, SECRET, ctx )
  * Handle incoming Update
  * https://core.telegram.org/bots/api#update
  */
-async function onUpdate ( update, TOKEN )
+async function onUpdate ( update )
 {
 	if ( "message" in update )
 	{
-		await onMessage( update.message, TOKEN );
+		await sendPlainText( update.message.chat.id, `Echo3:\n${ update.message.text}` );
 	}
-}
-
-/**
- * Handle incoming Message
- * https://core.telegram.org/bots/api#message
- */
-function onMessage ( message, TOKEN )
-{
-	return sendPlainText( message.chat.id, `Echo3:\n${ message.text}`, TOKEN );
 }
 
 /**
  * Send plain text message
  * https://core.telegram.org/bots/api#sendmessage
  */
-async function sendPlainText ( chatId, text, TOKEN )
+async function sendPlainText ( chatId, text )
 {
 	return ( await fetch( apiUrl( "sendMessage", {
 		chat_id: chatId,
 		text,
-	}, TOKEN ) ) ).json();
+	}, globalThis.token ) ) ).json();
 }
 
 /**
  * Set webhook to this worker's url
  * https://core.telegram.org/bots/api#setwebhook
  */
-async function registerWebhook ( request, requestUrl, suffix, secret, TOKEN )
+async function registerWebhook ( request, requestUrl, suffix )
 {
 	const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-	const r = await ( await fetch( apiUrl( "setWebhook", { url: webhookUrl, secret_token: secret }, TOKEN ) ) ).json();
+	const r = await ( await fetch( apiUrl( "setWebhook", { url: webhookUrl, secret_token: SECRET }, globalThis.token ) ) ).json();
 	return new Response( "ok" in r && r.ok ? "Ok" : JSON.stringify( r, null, 2 ) );
 }
 
@@ -149,23 +144,23 @@ async function registerWebhook ( request, requestUrl, suffix, secret, TOKEN )
  * Remove webhook
  * https://core.telegram.org/bots/api#setwebhook
  */
-async function unRegisterWebhook ( TOKEN )
+async function unRegisterWebhook ( )
 {
-	const r = await ( await fetch( apiUrl( "setWebhook", { url: "" }, TOKEN ) ) ).json();
+	const r = await ( await fetch( apiUrl( "setWebhook", { url: "" }, globalThis.token ) ) ).json();
 	return new Response( "ok" in r && r.ok ? "Ok" : JSON.stringify( r, null, 2 ) );
 }
 
 /**
  * Return url to telegram api, optionally with parameters added
  */
-function apiUrl ( methodName, params = null, TOKEN )
+function apiUrl ( methodName, params = null )
 {
 	let query = "";
 	if ( params )
 	{
 		query = `?${ new URLSearchParams( params ).toString()}`;
 	}
-	return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
+	return `https://api.telegram.org/bot${globalThis.token}/${methodName}${query}`;
 }
 
 
@@ -213,4 +208,9 @@ async function fetchHtmlWithCache ( url, kvNamespace )
 		console.error( `Error fetching HTML from ${url}:`, error );
 		throw error; // Re-throw to be handled by caller
 	}
+}
+
+function log ( update )
+{
+	console.log( util.inspect( update, { showHidden: true, depth: null }) );
 }
