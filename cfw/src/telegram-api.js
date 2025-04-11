@@ -133,7 +133,7 @@ export default class TelegramClient
 	{
 		if ( "message" in update )
 		{
-			await this.sendPlainText( update.message.chat.id, `Echo3:\n${update.message.text}` );
+			await this.sendMessageWithRetry( update.message.chat.id, `Echo3:\n${update.message.text}` );
 		}
 	}
 

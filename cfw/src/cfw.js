@@ -3,9 +3,9 @@ const util = require( "node:util" );
 
 import KVNamespace from "./kvNamespace.js";
 import TelegramClient from "./telegram-api.js";
-// const resources = require( "./resources" );
-// const search = require( "./search" );
-// const callback = require( "./callback" );
+// const resources = require("./resources");
+// const search = require("./search");
+// const callback = require("./callback");
 
 const fuseKeys = [
 	{ name: "surah.number", weight: 1 }, // 1
@@ -82,11 +82,11 @@ export default {
 		}
 		else if ( url.pathname === "/registerWebhook" )
 		{
-			return registerWebhook( request, url, WEBHOOK );
+			return registerWebhook( request, url, WEBHOOK, telegramClient );
 		}
 		else if ( url.pathname === "/unRegisterWebhook" )
 		{
-			return unRegisterWebhook( );
+			return unRegisterWebhook( telegramClient );
 		}
 		else
 		{
@@ -97,7 +97,8 @@ export default {
 
 async function handleWebhook ( request, ctx, telegramClient )
 {
-	if ( request.headers.get( "X-Telegram-Bot-Api-Secret-Token" ) !== SECRET )
+	const secretHeader = request.headers.get( "X-Telegram-Bot-Api-Secret-Token" );
+	if ( !telegramClient.validateWebhookRequest( secretHeader ) )
 	{
 		return new Response( "Unauthorized", { status: 403 });
 	}
@@ -105,76 +106,30 @@ async function handleWebhook ( request, ctx, telegramClient )
 	const update = await request.json();
 	// message: { \N	    message_id: 1130, \N	    from: { \N	      id: 354242641, \N	      is_bot: false, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      language_code: 'en' \N	    }, \N	    chat: { \N	      id: 354242641, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      type: 'private' \N	    }, \N	    date: 1744371005, \N	    text: 'سلام' \N	  } \N	} \N		{ \N	  update_id: 275201116, \N	  callback_query: { \N	    id: '1521460559992070096', \N	    from: { \N	      id: 354242641, \N	      is_bot: false, \N	      first_name: 'Масуд', \N	      username: 'mlibre', \N	      language_code: 'en' \N	    }, \N	    message: { \N	      message_id: 1051, \N	      from: { \N	        id: 7282644891, \N	        is_bot: true, \N	        first_name: 'تبیان - قرآن و تفسیر', \N	        username: 'TebianeBot' \N	      }, \N	      chat: { \N	        id: 354242641, \N	        first_name: 'Масуд', \N	        username: 'mlibre', \N	        type: 'private' \N	      }, \N	      date: 1732468708, \N	      edit_date: 1740855132, \N	      text: ' ٱلْفَاتِحَة 🕊️ فیش های رهبری 📖 ۱:۴\n' + \N	        '🔗 لینک به وب سایت', \N	      reply_markup: { \N	        inline_keyboard: [ \N	          [ \N	            { \N	              text: 'فیش های رهبری', \N	              callback_data: 'DEfB3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [ \N	            { text: '5', callback_data: 'HEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '4', callback_data: 'GEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '3', callback_data: 'FEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '✅ 2', callback_data: 'EEfB3_@0,1,2,3,4,5,6,3936' }, \N	            { text: '1', callback_data: 'DEfB3_@0,1,2,3,4,5,6,3936' }, \N	            [length]: 5 \N	          ], \N	          [ \N	            { \N	              text: 'مطالعه نشده', \N	              callback_data: 'EEfA3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [ \N	            { \N	              text: 'صفحه ی اصلی', \N	              callback_data: 'xEfB3_@0,1,2,3,4,5,6,3936' \N	            }, \N	            [length]: 1 \N	          ], \N	          [length]: 4 \N	        ] \N	      } \N	    }, \N	    chat_instance: '589297763605737593', \N	    data: 'DEfB3_@0,1,2,3,4,5,6,3936' \N	  } \N	}
 	log( update );
-	ctx.waitUntil( onUpdate( update ) );
+	ctx.waitUntil( telegramClient.handleUpdate( update ) );
 	return new Response( "Ok" );
 }
 
-/**
- * Handle incoming Update
- * https://core.telegram.org/bots/api#update
- */
-async function onUpdate ( update )
-{
-	if ( "message" in update )
-	{
-		await sendPlainText( update.message.chat.id, `Echo3:\n${ update.message.text}` );
-	}
-}
-
-/**
- * Send plain text message
- * https://core.telegram.org/bots/api#sendmessage
- */
-async function sendPlainText ( chatId, text )
-{
-	return ( await fetch( apiUrl( "sendMessage", {
-		chat_id: chatId,
-		text,
-	}, globalThis.token ) ) ).json();
-}
-
-/**
- * Set webhook to this worker's url
- * https://core.telegram.org/bots/api#setwebhook
- */
-async function registerWebhook ( request, requestUrl, suffix )
+async function registerWebhook ( request, requestUrl, suffix, telegramClient )
 {
 	const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-	const r = await ( await fetch( apiUrl( "setWebhook", { url: webhookUrl, secret_token: SECRET }, globalThis.token ) ) ).json();
-	return new Response( "ok" in r && r.ok ? "Ok" : JSON.stringify( r, null, 2 ) );
+	const response = await telegramClient.setWebhook( webhookUrl );
+	return new Response( "ok" in response && response.ok ? "Ok" : JSON.stringify( response, null, 2 ) );
 }
 
-/**
- * Remove webhook
- * https://core.telegram.org/bots/api#setwebhook
- */
-async function unRegisterWebhook ( )
+async function unRegisterWebhook ( telegramClient )
 {
-	const r = await ( await fetch( apiUrl( "setWebhook", { url: "" }, globalThis.token ) ) ).json();
-	return new Response( "ok" in r && r.ok ? "Ok" : JSON.stringify( r, null, 2 ) );
+	const response = await telegramClient.deleteWebhook();
+	return new Response( "ok" in response && response.ok ? "Ok" : JSON.stringify( response, null, 2 ) );
 }
-
-/**
- * Return url to telegram api, optionally with parameters added
- */
-function apiUrl ( methodName, params = null )
-{
-	let query = "";
-	if ( params )
-	{
-		query = `?${ new URLSearchParams( params ).toString()}`;
-	}
-	return `https://api.telegram.org/bot${globalThis.token}/${methodName}${query}`;
-}
-
 
 // Specific KV functions replacing database.js
-// const getReadStatus = async ( kv, type, chatId, verseRefIndex ) => { return await getKvJson( kv, `${type}_read_${chatId}_${verseRefIndex}` ); };
-// const putReadStatus = async ( kv, type, chatId, verseRefIndex ) => { return await putKvJson( kv, `${type}_read_${chatId}_${verseRefIndex}`, true ); }; // Store simple true marker
-// const deleteReadStatus = async ( kv, type, chatId, verseRefIndex ) => { return await deleteKv( kv, `${type}_read_${chatId}_${verseRefIndex}` ); };
+// const getReadStatus = async (kv, type, chatId, verseRefIndex) => { return await getKvJson(kv, `${type}_read_${chatId}_${verseRefIndex}`); };
+// const putReadStatus = async (kv, type, chatId, verseRefIndex) => { return await putKvJson(kv, `${type}_read_${chatId}_${verseRefIndex}`, true); }; // Store simple true marker
+// const deleteReadStatus = async (kv, type, chatId, verseRefIndex) => { return await deleteKv(kv, `${type}_read_${chatId}_${verseRefIndex}`); };
 
-// const getHtmlCache = async ( kv, url ) => { return await getKvText( kv, `cache_${url}` ); };
-// const putHtmlCache = async ( kv, url, html ) => { return await putKvText( kv, `cache_${url}`, html, CACHE_TTL_SECONDS ); };
+// const getHtmlCache = async (kv, url) => { return await getKvText(kv, `cache_${url}`); };
+// const putHtmlCache = async (kv, url, html) => { return await putKvText(kv, `cache_${url}`, html, CACHE_TTL_SECONDS); };
 
 // --- Web Fetching ---
 
