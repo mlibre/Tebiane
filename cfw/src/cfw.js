@@ -5,6 +5,19 @@ import KVNamespace from "./kvNamespace.js";
 import TelegramClient from "./telegram-api.js";
 // const search = require("./search");
 // const callback = require("./callback");
+import {
+	fuseKeys,
+	markdownCodes,
+	actionCodes,
+	perian_translations,
+	arabic_texts,
+	all_translations,
+	MESSAGE_LENGTH_LIMIT,
+	CACHE_TTL_SECONDS,
+	KV_QURAN_KEY,
+	WEBHOOK,
+	SECRET
+} from "./config.js";
 
 export default {
 	async fetch ( request, env, ctx )

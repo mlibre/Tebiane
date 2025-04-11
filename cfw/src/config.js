@@ -1,4 +1,5 @@
-const fuseKeys = [
+// Search configuration
+export const fuseKeys = [
 	{ name: "surah.number", weight: 1 }, // 1
 	{ name: "surah.persian_number", weight: 1 }, // ۱
 	{ name: "surah.arabic", weight: 1.2 }, // ٱلْفَاتِحَة
@@ -10,12 +11,13 @@ const fuseKeys = [
 	{ name: "verse.farsi_fooladvand", weight: 1 },
 	{ name: "verse.farsi_mojtabavi", weight: 1 },
 	{ name: "verse.arabic_clean", weight: 1 }, // بسم الله الرحمن الرحيم
-	{ name: "verse.arabic_enhanced", weight: 1 }, // بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+	{ name: "verse.arabic_enhanced", weight: 1 }, // بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
 	{ name: "id", weight: 0.05 }, // 1
 	{ name: "id_persian", weight: 0.05 }, // ۱
 ];
 
-const markdownCodes = {
+// Markdown formatting codes
+export const markdownCodes = {
 	bold: "booold@",
 	italic: "italic@",
 	underline: "underline@",
@@ -24,7 +26,8 @@ const markdownCodes = {
 	spoiler: "spoiler@"
 };
 
-const actionCodes = {
+// Action codes for callback queries
+export const actionCodes = {
 	nextResult: "a",
 	prevResult: "b",
 	ansarian: "c",
@@ -45,7 +48,8 @@ const actionCodes = {
 	khamenei: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
 };
 
-const perian_translations = {
+// Persian translation options
+export const perian_translations = {
 	[actionCodes.ansarian]: {
 		farsi: "انصاریان",
 		key: "farsi_ansarian"
@@ -64,7 +68,8 @@ const perian_translations = {
 	}
 };
 
-const arabic_texts = {
+// Arabic text options
+export const arabic_texts = {
 	[actionCodes.arabicText]: {
 		farsi: "عربی ساده",
 		key: "arabic_clean"
@@ -73,12 +78,14 @@ const arabic_texts = {
 		farsi: "عربی با اعراب",
 		key: "arabic_enhanced"
 	}
-}
+};
 
-const all_translations = { ...perian_translations, ...arabic_texts }
+// Combined translations
+export const all_translations = { ...perian_translations, ...arabic_texts };
 
-const MESSAGE_LENGTH_LIMIT = 2100;
-const CACHE_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for HTML cache
-const KV_QURAN_KEY = "quran"; // Key for Quran data in KV
-const WEBHOOK = "/endpoint";
-const SECRET = "MySecret123";
+// App constants
+export const MESSAGE_LENGTH_LIMIT = 2100;
+export const CACHE_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for HTML cache
+export const KV_QURAN_KEY = "quran"; // Key for Quran data in KV
+export const WEBHOOK = "/endpoint";
+export const SECRET = "MySecret123";
