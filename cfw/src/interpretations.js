@@ -1,6 +1,7 @@
 import { actionCodes, markdownCodes, MESSAGE_LENGTH_LIMIT } from "./config.js";
 import { normalizeMessage, extractInfoByRefIndex } from "./text-helpers.js";
 import { getReadabilityOutput, fetchHtmlWithCache } from "./web.js";
+import { JSDOM } from "jsdom";
 
 export async function generateSaanNuzulMessage ( verseRefIndex )
 {
@@ -16,9 +17,9 @@ export async function generateSaanNuzulMessage ( verseRefIndex )
 	const url = `https://wiki.ahlolbait.com/آیه_${currentAyahNumber}_سوره_${currentSurahTitlePersian}`;
 	const htmlString = await fetchHtmlWithCache( url );
 
-	// Since we can't use cheerio directly in Cloudflare Workers, we'll use DOM API
-	const parser = new DOMParser();
-	const doc = parser.parseFromString( htmlString, "text/html" );
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( htmlString );
+	const doc = dom.window.document;
 
 	const saanNuzulTexts = [];
 	const headerTest = `> ${currentSurahTitle} 🕊️ شان نزول 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
@@ -62,8 +63,9 @@ export async function generateTafsirNemunehMessage ( verseRefIndex, part )
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 
-	const parser = new DOMParser();
-	const doc = parser.parseFromString( rdrview, "text/html" );
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
 	const translationTexts = [];
 	let totalMessageLength = 0;
@@ -129,8 +131,9 @@ export async function generateKhameneiMessage ( verseRefIndex, part )
 
 	const rdrview = await getReadabilityOutput( url );
 
-	const parser = new DOMParser();
-	const doc = parser.parseFromString( rdrview, "text/html" );
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
 	const fishTexts = [];
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
@@ -144,7 +147,7 @@ export async function generateKhameneiMessage ( verseRefIndex, part )
 		const headers = npTL.querySelectorAll( "header" );
 		headers.forEach( header =>
 		{
-			const boldText = document.createElement( "br" );
+			const boldText = doc.createElement( "br" );
 			boldText.textContent = "BOLDTEXT";
 			header.parentNode.insertBefore( boldText, header );
 		});
@@ -152,7 +155,7 @@ export async function generateKhameneiMessage ( verseRefIndex, part )
 		const paragraphs = npTL.querySelectorAll( "p" );
 		paragraphs.forEach( p =>
 		{
-			const br = document.createElement( "br" );
+			const br = doc.createElement( "br" );
 			p.parentNode.insertBefore( br, p );
 		});
 
@@ -160,14 +163,14 @@ export async function generateKhameneiMessage ( verseRefIndex, part )
 		const brs = npTL.querySelectorAll( "br" );
 		brs.forEach( br =>
 		{
-			const textNode = document.createTextNode( "BREAKLINE" );
+			const textNode = doc.createTextNode( "BREAKLINE" );
 			br.parentNode.replaceChild( textNode, br );
 		});
 
 		const hrs = npTL.querySelectorAll( "hr" );
 		hrs.forEach( hr =>
 		{
-			const textNode = document.createTextNode( "FOOTERLINE" );
+			const textNode = doc.createTextNode( "FOOTERLINE" );
 			hr.parentNode.replaceChild( textNode, hr );
 		});
 
@@ -220,8 +223,9 @@ export async function calculateTotalTafsirParts ( currentSurahNumber, currentAya
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 
-	const parser = new DOMParser();
-	const doc = parser.parseFromString( rdrview, "text/html" );
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
 	const pageElement = doc.querySelector( ".page" );
 	if ( !pageElement ) return 0;
@@ -242,8 +246,9 @@ export async function calculateTotalKhameneiParts ( currentSurahNumber, currentA
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 
-	const parser = new DOMParser();
-	const doc = parser.parseFromString( rdrview, "text/html" );
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
 	// Prepare the document
 	const npTL = doc.querySelector( "#npTL" );
@@ -253,7 +258,7 @@ export async function calculateTotalKhameneiParts ( currentSurahNumber, currentA
 	const headers = npTL.querySelectorAll( "header" );
 	headers.forEach( header =>
 	{
-		const boldText = document.createElement( "br" );
+		const boldText = doc.createElement( "br" );
 		boldText.textContent = "BOLDTEXT";
 		header.parentNode.insertBefore( boldText, header );
 	});
@@ -261,7 +266,7 @@ export async function calculateTotalKhameneiParts ( currentSurahNumber, currentA
 	const paragraphs = npTL.querySelectorAll( "p" );
 	paragraphs.forEach( p =>
 	{
-		const br = document.createElement( "br" );
+		const br = doc.createElement( "br" );
 		p.parentNode.insertBefore( br, p );
 	});
 
@@ -269,14 +274,14 @@ export async function calculateTotalKhameneiParts ( currentSurahNumber, currentA
 	const brs = npTL.querySelectorAll( "br" );
 	brs.forEach( br =>
 	{
-		const textNode = document.createTextNode( "BREAKLINE" );
+		const textNode = doc.createTextNode( "BREAKLINE" );
 		br.parentNode.replaceChild( textNode, br );
 	});
 
 	const hrs = npTL.querySelectorAll( "hr" );
 	hrs.forEach( hr =>
 	{
-		const textNode = document.createTextNode( "FOOTERLINE" );
+		const textNode = doc.createTextNode( "FOOTERLINE" );
 		hr.parentNode.replaceChild( textNode, hr );
 	});
 
