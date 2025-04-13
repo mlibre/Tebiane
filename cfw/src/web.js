@@ -78,6 +78,7 @@ export async function getReadabilityOutput ( url )
 		const htmlContent = await fetchHtmlWithCache( url );
 
 		// Create a DOM from the HTML
+		// TODO ✘ [ERROR]   Error: [unenv] whatwg-url.parseURL is not implemented yet!
 		const dom = new JSDOM( htmlContent, { url });
 		const reader = new Readability( dom.window.document );
 		const article = reader.parse();
