@@ -16,6 +16,8 @@ import {
 	SECRET
 } from "./config.js";
 
+// import { getReadabilityOutput } from "./web.js";
+
 export default {
 	async fetch ( request, env, ctx )
 	{
@@ -35,7 +37,6 @@ export default {
 		globalThis.kvNamespace = kvNamespace;
 
 		// Load Quran data once per worker instance (or fetch if not loaded)
-		// Simple in-memory cache for the Quran data within this worker instance
 		if ( !globalThis.quranData )
 		{
 			globalThis.quranData = await kvNamespace.getJson( KV_QURAN_KEY );
@@ -58,6 +59,9 @@ export default {
 		}
 		const { quranData, sources } = globalThis;
 
+		// const result = await getReadabilityOutput( "https://www.alquran.cloud/api/v1/surah" )
+		// console.log( "HHHHHHHHHHHHHHHEY", result );
+
 		const fuseIndex = Fuse.createIndex( fuseKeys, quranData )
 		const fuse = new Fuse( quranData, {
 			isCaseSensitive: false,
@@ -68,7 +72,7 @@ export default {
 			keys: fuseKeys
 		}, fuseIndex );
 
-		const telegramClient = new TelegramClient( token, SECRET, fuse );
+		const telegramClient = new TelegramClient({ token, secretToken: SECRET, fuse, sources });
 
 		const url = new URL( request.url );
 		if ( url.pathname === WEBHOOK )
@@ -112,41 +116,3 @@ async function handleWebhook ( request, ctx, telegramClient )
 
 // const getHtmlCache = async (kv, url) => { return await getKvText(kv, `cache_${url}`); };
 // const putHtmlCache = async (kv, url, html) => { return await putKvText(kv, `cache_${url}`, html, CACHE_TTL_SECONDS); };
-
-// --- Web Fetching ---
-
-async function fetchHtmlWithCache ( url, kvNamespace )
-{
-	const cachedHtml = await getHtmlCache( kvNamespace, url );
-	if ( cachedHtml )
-	{
-		// console.log(`Cache hit for: ${url}`);
-		return cachedHtml;
-	}
-
-	// console.log(`Cache miss, fetching: ${url}`);
-	try
-	{
-		const response = await fetch( url, {
-			headers: { // Add a user-agent to look less like a bot
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-			}
-		});
-		if ( !response.ok )
-		{
-			throw new Error( `HTTP error! status: ${response.status} for ${url}` );
-		}
-		const htmlContent = await response.text();
-		const cleanedHtml = htmlContent.replace( /\s+/g, " " ).trim(); // Basic cleaning
-
-		// Store in cache
-		await putHtmlCache( kvNamespace, url, cleanedHtml );
-
-		return cleanedHtml;
-	}
-	catch ( error )
-	{
-		console.error( `Error fetching HTML from ${url}:`, error );
-		throw error; // Re-throw to be handled by caller
-	}
-}

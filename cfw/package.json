@@ -9,12 +9,14 @@
 		"build-quran": "node scripts/merging_quran_translations.js"
 	},
 	"dependencies": {
+		"@mozilla/readability": "^0.6.0",
 		"fuse.js": "^7.1.0",
+		"jsdom": "^26.1.0",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
 		"eslint": "^9.4.0",
-		"wrangler": "^4.9.1"
+		"wrangler": "^4.10.0"
 	}
 }

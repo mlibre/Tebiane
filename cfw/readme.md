@@ -22,8 +22,8 @@ wrangler telemetry disable
 # create a "quran" key in the namespace with the value of the quran.json content
 # Copy the ID of KV Namespace
 # OR
-# wrangler kv namespace create "CFW_TEBIANE"
-# wrangler kv key put --binding=CFW_TEBIANE "quran" --path=../quran.json --remote
+# wrangler kv namespace create "CFW_TEBIANE" --remote
+# wrangler kv key put --binding=CFW_TEBIANE "quran" --path=../sources/quran.json --remote
 # wrangler kv key put --binding=CFW_TEBIANE "sources" --path=../sources/sources.txt --remote
 
 

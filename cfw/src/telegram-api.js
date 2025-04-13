@@ -5,12 +5,19 @@ import { actionCodes } from "./config.js";
 
 export default class TelegramClient
 {
-	constructor ( token, secretToken = null, fuse, baseUrl = "https://api.telegram.org" )
+	constructor ({
+		token,
+		secretToken = null,
+		fuse,
+		baseUrl = "https://api.telegram.org",
+		sources
+	})
 	{
 		this.token = token;
 		this.secretToken = secretToken;
 		this.apiBaseUrl = `${baseUrl}/bot${token}`;
 		this.fuse = fuse;
+		this.sources = sources;
 	}
 
 	async withRetry ( operation, options, retries = 10, delay = 50 )
@@ -139,13 +146,7 @@ export default class TelegramClient
 
 	async sendAllResources ( chatId )
 	{
-		if ( !globalThis.sources )
-		{
-			await this.sendMessageWithRetry( chatId, "منابع در دسترس نیست" );
-			return;
-		}
-
-		const resourcesMessage = `\`\`\`text\n${globalThis.sources}\`\`\``;
+		const resourcesMessage = `\`\`\`text\n${this.sources}\`\`\``;
 		await this.sendMessageWithRetry( chatId, resourcesMessage, { parse_mode: "MarkdownV2" });
 	}
 
@@ -162,17 +163,17 @@ export default class TelegramClient
 			const message = generateMessage( refIndex, actionCodes.makarem );
 
 			await this.sendMessageWithRetry( chatId, message, {
-			// reply_markup: {
-			// 	inline_keyboard: await genButtons(
-			// 		refIndex, refIndex, refResults,
-			// 		{
-			// 			actionCode: actionCodes.makarem,
-			// 			lastTranslaction: actionCodes.makarem,
-			// 			chatId,
-			// 			messageId
-			// 		}
-			// 	)
-			// },
+				// reply_markup: {
+				// 	inline_keyboard: await genButtons(
+				// 		refIndex, refIndex, refResults,
+				// 		{
+				// 			actionCode: actionCodes.makarem,
+				// 			lastTranslaction: actionCodes.makarem,
+				// 			chatId,
+				// 			messageId
+				// 		}
+				// 	)
+				// },
 				parse_mode: "MarkdownV2"
 			});
 		}
