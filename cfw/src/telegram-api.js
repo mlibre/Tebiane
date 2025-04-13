@@ -2,8 +2,7 @@ import util from "node:util";
 import { generateMessage } from "./message-generator.js";
 import { actionCodes } from "./config.js";
 import { genButtons } from "./button-generator.js";
-
-// const callback = require("./callback");
+import { handleCallback } from "./callback.js";
 
 export default class TelegramClient
 {
@@ -137,11 +136,18 @@ export default class TelegramClient
 		}
 		else if ( "callback_query" in update )
 		{
-			const { data } = update.callback_query; // 'k1475_@1463,6155,106,1053,2000,6149,392,592'
-			const chatId = update.callback_query.message.chat.id
-			const messageId = update.callback_query.message.message_id
-			// await callback( bot, data, chatId, messageId );
-			this.log( "hey", data, chatId, messageId );
+			const { data } = update.callback_query;
+			const chatId = update.callback_query.message.chat.id;
+			const messageId = update.callback_query.message.message_id;
+
+			// Use the callback handler
+			await handleCallback( this, data, chatId, messageId );
+
+			// Answer the callback query to remove the loading state
+			await this.makeRequest( "answerCallbackQuery", {
+				callback_query_id: update.callback_query.id
+			});
+
 			return;
 		}
 	}

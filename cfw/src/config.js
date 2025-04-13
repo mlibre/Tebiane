@@ -63,7 +63,7 @@ export const perian_translations = {
 		key: "farsi_mojtabavi"
 	},
 	[actionCodes.makarem]: {
-		farsi: "مکارم شیرازی",
+		farsi: "مکارم",
 		key: "farsi_makarem"
 	}
 };
