@@ -216,6 +216,7 @@ export default class TelegramClient
 
 	isNetworkError ( error )
 	{
+		// TODO: check with fetch
 		return error.message.includes( "socket hang up" ) ||
       error.message.includes( "network socket disconnected" ) ||
       error.message.includes( "fetch failed" );

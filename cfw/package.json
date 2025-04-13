@@ -1,6 +1,6 @@
 {
 	"name": "cfw-tebiane",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
@@ -11,8 +11,7 @@
 	"dependencies": {
 		"@mozilla/readability": "^0.6.0",
 		"fuse.js": "^7.1.0",
-		"jsdom": "^26.1.0",
-		"lodash": "^4.17.21"
+		"jsdom": "^26.1.0"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",

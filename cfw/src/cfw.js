@@ -16,8 +16,6 @@ import {
 	SECRET
 } from "./config.js";
 
-// import { getReadabilityOutput } from "./web.js";
-
 export default {
 	async fetch ( request, env, ctx )
 	{
@@ -58,9 +56,6 @@ export default {
 			console.log( `Sources data loaded successfully (${globalThis.sources})` );
 		}
 		const { quranData, sources } = globalThis;
-
-		// const result = await getReadabilityOutput( "https://www.alquran.cloud/api/v1/surah" )
-		// console.log( "HHHHHHHHHHHHHHHEY", result );
 
 		const fuseIndex = Fuse.createIndex( fuseKeys, quranData )
 		const fuse = new Fuse( quranData, {
