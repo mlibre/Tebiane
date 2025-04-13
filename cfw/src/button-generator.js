@@ -126,7 +126,7 @@ export async function genButtons (
 		],
 		Object.entries( perian_translations ).map( ( [key, value] ) =>
 		{
-			const isCurrentTranslation = key === actionCode;
+			const isCurrentTranslation = key === lastTranslaction;
 			return {
 				text: isCurrentTranslation ? `${value.farsi} ✅` : value.farsi,
 				callback_data: `${key}${verse_ref}`
