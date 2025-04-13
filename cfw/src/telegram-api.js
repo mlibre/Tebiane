@@ -197,6 +197,8 @@ export default class TelegramClient
 		const response = await this.makeRequest( "setWebhook", {
 			url: webhookUrl,
 			secret_token: this.secretToken,
+			drop_pending_updates: true,
+			max_connections: 10,
 		});
 		return response.ok === true;
 	}
