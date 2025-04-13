@@ -1,6 +1,8 @@
 import util from "node:util";
 import { generateMessage } from "./message-generator.js";
 import { actionCodes } from "./config.js";
+import { genButtons } from "./button-generator.js";
+
 // const callback = require("./callback");
 
 export default class TelegramClient
@@ -153,7 +155,7 @@ export default class TelegramClient
 	async search ( text, chatId, messageId )
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
-		this.log( "hey2", text, chatId, messageId, userInput );
+		this.log( "search request", text, chatId, messageId, userInput );
 		const searchResult = this.fuse.search( userInput );
 
 		if ( searchResult.length > 0 )
@@ -163,17 +165,17 @@ export default class TelegramClient
 			const message = generateMessage( refIndex, actionCodes.makarem );
 
 			await this.sendMessageWithRetry( chatId, message, {
-				// reply_markup: {
-				// 	inline_keyboard: await genButtons(
-				// 		refIndex, refIndex, refResults,
-				// 		{
-				// 			actionCode: actionCodes.makarem,
-				// 			lastTranslaction: actionCodes.makarem,
-				// 			chatId,
-				// 			messageId
-				// 		}
-				// 	)
-				// },
+				reply_markup: {
+					inline_keyboard: await genButtons(
+						refIndex, refIndex, refResults,
+						{
+							actionCode: actionCodes.makarem,
+							lastTranslaction: actionCodes.makarem,
+							chatId,
+							messageId
+						}
+					)
+				},
 				parse_mode: "MarkdownV2"
 			});
 		}
