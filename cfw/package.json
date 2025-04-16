@@ -1,12 +1,11 @@
 {
 	"name": "cfw-tebiane",
-	"version": "1.0.2",
+	"version": "1.1.2",
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev --local",
-		"start": "wrangler dev --local",
-		"build-quran": "node scripts/merging_quran_translations.js"
+		"start": "wrangler dev --local"
 	},
 	"dependencies": {
 		"@mozilla/readability": "^0.6.0",

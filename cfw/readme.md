@@ -39,6 +39,9 @@ nano wrangler.jsonc
   "ENV_BOT_TOKEN": "ENV_BOT_TOKEN",
   "ENV_BOT_SECRET": "MySecret123"
 },
+"compatibility_flags": [
+  "nodejs_compat"
+],
 
 wrangler deploy
 wrangler tail

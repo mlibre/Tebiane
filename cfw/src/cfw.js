@@ -53,7 +53,6 @@ export default {
 				console.error( "Failed to load sources data from KV!" );
 				return new Response( "Failed to load sources data", { status: 500 });
 			}
-			console.log( `Sources data loaded successfully (${globalThis.sources})` );
 		}
 		const { quranData, sources } = globalThis;
 
