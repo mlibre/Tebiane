@@ -1,4 +1,4 @@
-# تبیان قران - Cloudflare Workers
+# tetebiane-Cloudflare-Workers
 
 ## Deploy On Cloudflare Workers
 
