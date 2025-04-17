@@ -172,12 +172,6 @@ module.exports = async function callback_query ( bot, input, chatId, messageId )
 				inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
 			},
 		})
-		// const replyMerkup = {
-		// 	inline_keyboard: await genButtons( verseRefIndex, refIndex, searchResultIndexes, userOtions )
-		// }
-		// await editMessageReplyMarkupWithRetry( bot, replyMerkup, {
-		// 	...messageOptions
-		// })
 	}
 	else
 	{

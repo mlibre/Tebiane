@@ -103,11 +103,3 @@ async function handleWebhook ( request, ctx, telegramClient )
 	ctx.waitUntil( telegramClient.handleUpdate( update ) );
 	return new Response( true );
 }
-
-// Specific KV functions replacing database.js
-// const getReadStatus = async (kv, type, chatId, verseRefIndex) => { return await getKvJson(kv, `${type}_read_${chatId}_${verseRefIndex}`); };
-// const putReadStatus = async (kv, type, chatId, verseRefIndex) => { return await putKvJson(kv, `${type}_read_${chatId}_${verseRefIndex}`, true); }; // Store simple true marker
-// const deleteReadStatus = async (kv, type, chatId, verseRefIndex) => { return await deleteKv(kv, `${type}_read_${chatId}_${verseRefIndex}`); };
-
-// const getHtmlCache = async (kv, url) => { return await getKvText(kv, `cache_${url}`); };
-// const putHtmlCache = async (kv, url, html) => { return await putKvText(kv, `cache_${url}`, html, CACHE_TTL_SECONDS); };

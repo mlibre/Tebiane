@@ -88,4 +88,4 @@ export const MESSAGE_LENGTH_LIMIT = 2100;
 export const CACHE_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for HTML cache
 export const KV_QURAN_KEY = "quran"; // Key for Quran data in KV
 export const WEBHOOK = "/endpoint";
-export const SECRET = "MySecret123";
+export const SECRET = "MySecret123"; // todo move to ENV
