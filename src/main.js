@@ -33,7 +33,8 @@ const fuse = new Fuse( quran, {
 	includeScore: false,
 	includeMatches: false,
 	useExtendedSearch: false,
-	threshold: 0.5,
+	ignoreLocation: true,
+	threshold: 0.8,
 	keys: fuseKeys
 }, fuseIndex );
 
