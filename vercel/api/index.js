@@ -1,4 +1,4 @@
-const TelegramClient = require( "../src/telegram" );
+// const TelegramClient = require( "../src/telegram" );
 const Fuse = require( "fuse.js" );
 const path = require( "path" );
 const fs = require( "fs" );
@@ -33,6 +33,12 @@ const fuse = new Fuse( quranData, {
 	threshold: 0.8,
 	keys: fuseKeys,
 }, fuseIndex );
+
+// const RedisDatabase = require( "../src/database" );
+// const database = new RedisDatabase();
+// const databaseClient = await database.connect();
+// database.putText( "test key", "test value" );
+// await database.getText( "test key" )
 
 // --- Vercel Serverless Function Handler ---
 // This is the main function Vercel calls for each incoming request.

@@ -1,19 +1,20 @@
+
 const { createClient } = require( "redis" );
+const { redisUrl } = require( "./config" )
 
 class RedisDatabase
 {
-	constructor ( options = {})
+	constructor ( )
 	{
-		this.redis = createClient( options );
+		this.redis = createClient({ url: redisUrl });
 		this.redis.on( "error", err => { return console.error( "Redis Client Error", err ) });
-		this.connect();
 	}
 
 	async connect ()
 	{
 		try
 		{
-			await this.redis.connect();
+			return await this.redis.connect();
 		}
 		catch ( e )
 		{
