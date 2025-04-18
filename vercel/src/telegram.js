@@ -1,6 +1,6 @@
 const util = require( "node:util" );
 const { generateMessage } = require( "./message-generator.js" );
-const { actionCodes } = require( "./config.js" );
+const { actionCodes, appUrl } = require( "./config.js" );
 const { genButtons } = require( "./button-generator.js" );
 const { handleCallback } = require( "./callback.js" );
 
@@ -8,14 +8,12 @@ class TelegramClient
 {
 	constructor ({
 		token,
-		secretToken = null,
 		fuse,
 		baseUrl = "https://api.telegram.org",
 		sources
 	})
 	{
 		this.token = token;
-		this.secretToken = secretToken;
 		this.apiBaseUrl = `${baseUrl}/bot${token}`;
 		this.fuse = fuse;
 		this.sources = sources;
@@ -192,10 +190,8 @@ class TelegramClient
 
 	async registerWebhook ( requestUrl, suffix )
 	{
-		const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
 		const response = await this.makeRequest( "setWebhook", {
-			url: webhookUrl,
-			secret_token: this.secretToken,
+			url: appUrl,
 			drop_pending_updates: true,
 			max_connections: 10,
 		});
@@ -206,11 +202,6 @@ class TelegramClient
 	{
 		const response = await this.makeRequest( "setWebhook", { url: "" });
 		return response.ok === true;
-	}
-
-	validateWebhookRequest ( secretHeader )
-	{
-		return !this.secretToken || secretHeader === this.secretToken;
 	}
 
 	isNetworkError ( error )
