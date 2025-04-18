@@ -1,29 +1,25 @@
 {
-  "name": "tetebiane-vercel",
+  "name": "tebiane-vercel",
   "version": "1.0.0",
-  "description": "tetebiane-vercel",
+  "description": "Tebiane Quran Bot for Vercel",
+  "main": "api/index.js",
+  "private": true,
   "license": "UNLICENSED",
-  "main": "src/index.ts",
-  "author": {
-    "name": "mlibre"
+  "author": "mlibre",
+  "scripts": {
+    "start": "vercel dev",
+    "deploy": "vercel --prod"
   },
   "dependencies": {
-    "@vercel/node": "^3.2.24",
-    "dotenv-cli": "^7.4.2",
-    "telegraf": "^4.16.3"
+    "@mozilla/readability": "^0.5.0",
+    "@vercel/kv": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "fuse.js": "^7.0.0",
+    "jsdom": "^24.1.1",
+    "node-telegram-bot-api": "^0.66.0",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.12",
-    "@types/node": "^22.8.6",
-    "@vercel/ncc": "^0.38.2",
-    "debug": "^4.3.7",
-    "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
-  },
-  "scripts": {
-    "dev": "DEBUG=bot* dotenv -- nodemon -e ts -x ts-node src/index.ts",
-    "build": "ncc build src/index.ts -o public -m",
-    "lint": "tsc --noemit"
+    "vercel": "^35.2.1"
   }
 }
