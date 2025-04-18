@@ -191,7 +191,7 @@ class TelegramClient
 		const response = await this.makeRequest( "setWebhook", {
 			url: `${productionUrl}${webhookPath}`,
 			drop_pending_updates: true,
-			max_connections: 10,
+			max_connections: 20,
 		});
 		return { response, url: `${productionUrl}${webhookPath}` };
 	}
