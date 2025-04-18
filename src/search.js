@@ -8,7 +8,7 @@ const config = require( "./configs" );
 module.exports = async function search ( bot, fuse, text, chatId, messageId )
 {
 	const userInput = text.replace( /^\/search\s*/, "" );
-	const searchResult = fuse.search( userInput );
+	const searchResult = fuse.search( userInput, 12 );
 
 	if ( searchResult.length > 0 )
 	{

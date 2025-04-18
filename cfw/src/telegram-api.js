@@ -162,7 +162,7 @@ export default class TelegramClient
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
 		// this.log( "search request", text, chatId, messageId, userInput );
-		const searchResult = this.fuse.search( userInput );
+		const searchResult = this.fuse.search( userInput, 12 );
 
 		if ( searchResult.length > 0 )
 		{

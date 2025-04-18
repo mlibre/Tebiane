@@ -1,6 +1,6 @@
 const util = require( "node:util" );
 const { generateMessage } = require( "./message-generator.js" );
-const { actionCodes, appUrl, token, sourcesText } = require( "./config.js" );
+const { actionCodes, productionUrl, webhookPath, token, sourcesText } = require( "./config.js" );
 const { genButtons } = require( "./button-generator.js" );
 const { handleCallback } = require( "./callback.js" );
 
@@ -157,7 +157,7 @@ class TelegramClient
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
 		// this.log( "search request", text, chatId, messageId, userInput );
-		const searchResult = this.fuse.search( userInput );
+		const searchResult = this.fuse.search( userInput, 12 );
 
 		if ( searchResult.length > 0 )
 		{
@@ -186,14 +186,14 @@ class TelegramClient
 		}
 	}
 
-	async registerWebhook ( requestUrl, suffix )
+	async registerWebhook ( )
 	{
 		const response = await this.makeRequest( "setWebhook", {
-			url: appUrl,
+			url: `${productionUrl}${webhookPath}`,
 			drop_pending_updates: true,
 			max_connections: 10,
 		});
-		return response.ok === true;
+		return { response, url: `${productionUrl}${webhookPath}` };
 	}
 
 	async unRegisterWebhook ()

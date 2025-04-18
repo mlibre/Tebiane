@@ -5,6 +5,7 @@ const quranData = require( "../sources/quran.json" );
 const sourcesText = fs.readFileSync( path.resolve( __dirname, "../sources/sources.txt" ), "utf-8" );
 
 const appUrl = process.env.VERCEL_URL;
+const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
 const webhookPath = "/api";
 
 if ( !appUrl )
@@ -114,6 +115,7 @@ const fuseKeys = [
 
 module.exports = {
 	appUrl,
+	productionUrl,
 	webhookPath,
 	token,
 	redisUrl,

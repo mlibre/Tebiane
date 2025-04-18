@@ -21,7 +21,9 @@ vercel env add VERCEL_URL
 # vercel dev
 vercel
 vercel --prod
+vercel logs https://tebiane-vercel.vercel.app
 
-curl "https://tebiane-vercel.vercel.app/api?setup_webhook=true"
+# https://tebiane-vercel.vercel.app/api?register_webhook=true
+curl "https://tebiane-vercel.vercel.app/api?register_webhook=true"
 
 ```
