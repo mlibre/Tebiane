@@ -13,8 +13,8 @@ let quranData;
 let sourcesText;
 try
 {
-	quranData = require( "../src/sources/quran.json" );
-	sourcesText = fs.readFileSync( path.resolve( __dirname, "../src/sources/sources.txt" ), "utf-8" );
+	quranData = require( "../sources/quran.json" );
+	sourcesText = fs.readFileSync( path.resolve( __dirname, "../sources/sources.txt" ), "utf-8" );
 }
 catch ( error )
 {

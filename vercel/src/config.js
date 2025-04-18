@@ -49,7 +49,7 @@ const actionCodes = {
 	khamenei: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
 };
 
-const perian_translations = perian_translations = {
+const perian_translations = {
 	[actionCodes.ansarian]: {
 		farsi: "انصاریان",
 		key: "farsi_ansarian"
@@ -68,7 +68,7 @@ const perian_translations = perian_translations = {
 	}
 };
 
-const arabic_texts = arabic_texts = {
+const arabic_texts = {
 	[actionCodes.arabicText]: {
 		farsi: "عربی ساده",
 		key: "arabic_clean"
