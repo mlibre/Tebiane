@@ -1,4 +1,5 @@
 require( "dotenv" ).config();
+const quranData = require( "../sources/quran.json" );
 
 const appUrl = process.env.VERCEL_URL;
 const webhookPath = "/api";
@@ -113,6 +114,7 @@ module.exports = {
 	webhookPath,
 	token,
 	redisUrl,
+	quranData,
 	messageLength,
 	CACHE_TTL_SECONDS,
 	markdownCodes,
