@@ -1,5 +1,8 @@
+const path = require( "path" );
+const fs = require( "fs" );
 require( "dotenv" ).config();
 const quranData = require( "../sources/quran.json" );
+const sourcesText = fs.readFileSync( path.resolve( __dirname, "../sources/sources.txt" ), "utf-8" );
 
 const appUrl = process.env.VERCEL_URL;
 const webhookPath = "/api";
@@ -115,6 +118,7 @@ module.exports = {
 	token,
 	redisUrl,
 	quranData,
+	sourcesText,
 	messageLength,
 	CACHE_TTL_SECONDS,
 	markdownCodes,

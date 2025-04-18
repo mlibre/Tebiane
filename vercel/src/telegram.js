@@ -1,22 +1,20 @@
 const util = require( "node:util" );
 const { generateMessage } = require( "./message-generator.js" );
-const { actionCodes, appUrl } = require( "./config.js" );
+const { actionCodes, appUrl, token, sourcesText } = require( "./config.js" );
 const { genButtons } = require( "./button-generator.js" );
 const { handleCallback } = require( "./callback.js" );
 
 class TelegramClient
 {
 	constructor ({
-		token,
 		fuse,
-		baseUrl = "https://api.telegram.org",
-		sources
+		baseUrl = "https://api.telegram.org"
 	})
 	{
 		this.token = token;
 		this.apiBaseUrl = `${baseUrl}/bot${token}`;
 		this.fuse = fuse;
-		this.sources = sources;
+		this.sources = sourcesText;
 	}
 
 	async withRetry ( operation, options, retries = 10, delay = 50 )
