@@ -11,7 +11,7 @@ const fuse = new Fuse( quranData, {
 	includeScore: false,
 	includeMatches: false,
 	useExtendedSearch: false,
-	ignoreLocation: false,
+	ignoreLocation: true,
 	threshold: 0.8,
 	keys: fuseKeys,
 }, fuseIndex );
