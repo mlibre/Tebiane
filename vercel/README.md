@@ -12,9 +12,11 @@ npm i -g vercel
 nano .env
 BOT_TOKEN=TOKEN
 REDIS_URL=REDIS_URL
+VERCEL_URL=VERCEL_URL
 
 vercel env add BOT_TOKEN
 vercel env add REDIS_URL
+vercel env add VERCEL_URL
 
 # vercel dev
 vercel

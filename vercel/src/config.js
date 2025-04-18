@@ -1,6 +1,6 @@
 require( "dotenv" ).config();
 
-const appUrl = process.env.VERCEL_URL; // Provided by Vercel
+const appUrl = process.env.VERCEL_URL;
 const webhookPath = "/api";
 
 if ( !appUrl )

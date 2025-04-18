@@ -17,7 +17,6 @@
     "dotenv": "^16.4.5",
     "fuse.js": "^7.0.0",
     "jsdom": "^24.1.1",
-    "node-telegram-bot-api": "^0.66.0",
     "redis": "^4.7.0"
   },
   "devDependencies": {
