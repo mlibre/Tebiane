@@ -1,5 +1,14 @@
 require( "dotenv" ).config();
 
+const appUrl = process.env.VERCEL_URL; // Provided by Vercel
+const webhookPath = "/api";
+
+if ( !appUrl )
+{
+	console.warn( "VERCEL_URL not set. Skipping webhook setup." );
+	throw new Error( "VERCEL_URL is required" );
+}
+
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if ( !token )
 {
@@ -100,6 +109,8 @@ const fuseKeys = [
 
 
 module.exports = {
+	appUrl,
+	webhookPath,
 	token,
 	redisUrl,
 	messageLength,

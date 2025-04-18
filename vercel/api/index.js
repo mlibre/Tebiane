@@ -3,7 +3,7 @@ const Fuse = require( "fuse.js" );
 const path = require( "path" );
 const fs = require( "fs" );
 
-const { token, fuseKeys } = require( "../src/config" );
+const { token, fuseKeys, appUrl, webhookPath } = require( "../src/config" );
 
 // const searchHandler = require( "../src/search" );
 // const callbackHandler = require( "../src/callback" );
@@ -146,12 +146,6 @@ bot.on( "webhook_error", ( error ) =>
 // This is the main function Vercel calls for each incoming request.
 module.exports = async ( req, res ) =>
 {
-	if ( req.method !== "POST" )
-	{
-		console.log( "Received non-POST request" );
-		return res.status( 405 ).send( "Method Not Allowed" );
-	}
-
 	try
 	{
 		// The request body should contain the Telegram update JSON
@@ -184,21 +178,14 @@ module.exports = async ( req, res ) =>
 	}
 };
 
-// --- Webhook Setup (Optional but Recommended) ---
-// You can run this logic once, e.g., in a separate script or manually.
-// Or, include it here to run on first deployment/invocation (less ideal).
-// Vercel provides the VERCEL_URL env var automatically in deployment.
-const APP_URL = process.env.VERCEL_URL; // Provided by Vercel
-const WEBHOOK_PATH = "/api"; // Path to this serverless function
-
 async function setupWebhook ()
 {
-	if ( !APP_URL )
+	if ( !appUrl )
 	{
 		console.warn( "VERCEL_URL not set. Skipping webhook setup." );
 		return;
 	}
-	const webhookUrl = `https://${APP_URL}${WEBHOOK_PATH}`;
+	const webhookUrl = `https://${appUrl}${webhookPath}`;
 	try
 	{
 		const currentWebhook = await bot.getWebHookInfo();
@@ -206,7 +193,8 @@ async function setupWebhook ()
 		{
 			console.log( `Setting webhook to: ${webhookUrl}` );
 			await bot.setWebHook( webhookUrl, {
-				// drop_pending_updates: true // Optional: drop old updates
+				drop_pending_updates: true,
+				max_connections: 10,
 			});
 			console.log( "Webhook set successfully." );
 		}
@@ -220,7 +208,3 @@ async function setupWebhook ()
 		console.error( "Error setting/checking webhook:", error );
 	}
 }
-
-// Call setupWebhook() only if needed, e.g., during a build step or manually.
-// Running it on every invocation is inefficient.
-// setupWebhook(); // Uncomment cautiously or run separately.
