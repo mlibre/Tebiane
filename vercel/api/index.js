@@ -1,4 +1,4 @@
-// const TelegramClient = require( "../src/telegram" );
+const TelegramClient = require( "../src/telegram" );
 const Fuse = require( "fuse.js" );
 const path = require( "path" );
 const fs = require( "fs" );
