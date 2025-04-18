@@ -1,7 +1,8 @@
 const { genButtons } = require( "./button-generator.js" );
 const { generateMessage } = require( "./message-generator.js" );
-const { generateSaanNuzulMessage, generateKhameneiMessage, generateTafsirNemunehMessage } = require( "./interpretations.js" );
-const { actionCodes, all_translations } = require( "./config.js" );
+const { generateSaanNuzulMessage, generateKhameneiMessage, generateTafsirNemunehMessage, markTafsirNemunehAsRead, markTafsirNemunehAsUnread, markKhameneiAsRead, markKhameneiAsUnread } = require( "./interpretations.js" );
+const { actionCodes, all_translations, quranData } = require( "./config.js" );
+const database = require( "./database.js" );
 
 async function handleCallback ( telegramClient, input, chatId, messageId )
 {
@@ -34,7 +35,7 @@ async function handleCallback ( telegramClient, input, chatId, messageId )
 	}
 	else if ( actionCodes.nextVerse === actionCode )
 	{ // next ayeh
-		if ( verseRefIndex + 1 < globalThis.quranData.length )
+		if ( verseRefIndex + 1 < quranData.length )
 		{
 			verseRefIndex += 1;
 		}
@@ -113,13 +114,14 @@ async function handleCallback ( telegramClient, input, chatId, messageId )
 		if ( readStatusCode === actionCodes.toggleRead )
 		{
 			const key = `tafsir_read_${chatId}_${verseRefIndex}`;
-			if ( await globalThis.kvNamespace.getJson( key ) )
+			await database.connect();
+			if ( await database.getJson( key ) )
 			{
-				await globalThis.kvNamespace.delete( key );
+				await database.delete( key );
 			}
 			else
 			{
-				await globalThis.kvNamespace.putJson( key, true );
+				await database.putJson( key, true );
 			}
 		}
 		const message = await generateTafsirNemunehMessage( verseRefIndex, actionCodes.tafsirNemooneh.indexOf( actionCode ) );
@@ -146,13 +148,14 @@ async function handleCallback ( telegramClient, input, chatId, messageId )
 		if ( readStatusCode === actionCodes.toggleRead )
 		{
 			const key = `khamenei_read_${chatId}_${verseRefIndex}`;
-			if ( await globalThis.kvNamespace.getJson( key ) )
+			await database.connect();
+			if ( await database.getJson( key ) )
 			{
-				await globalThis.kvNamespace.delete( key );
+				await database.delete( key );
 			}
 			else
 			{
-				await globalThis.kvNamespace.putJson( key, true );
+				await database.putJson( key, true );
 			}
 		}
 		const message = await generateKhameneiMessage( verseRefIndex, actionCodes.khamenei.indexOf( actionCode ) );

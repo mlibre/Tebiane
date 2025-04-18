@@ -2,6 +2,7 @@ const { actionCodes, markdownCodes, MESSAGE_LENGTH_LIMIT } = require( "./config.
 const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers.js" );
 const { getReadabilityOutput, fetchHtmlWithCache } = require( "./web.js" );
 const { JSDOM } = require( "jsdom" );
+const database = require( "./database.js" );
 
 async function generateSaanNuzulMessage ( verseRefIndex )
 {
@@ -316,32 +317,38 @@ async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumb
 
 async function isTafsirNemunehReadByUser ( chatId, verseRefIndex )
 {
-	return await globalThis.kvNamespace.getJson( `tafsir_read_${chatId}_${verseRefIndex}` );
+	await database.connect();
+	return await database.getJson( `tafsir_read_${chatId}_${verseRefIndex}` );
 }
 
 async function isKhameneiReadByUser ( chatId, verseRefIndex )
 {
-	return await globalThis.kvNamespace.getJson( `khamenei_read_${chatId}_${verseRefIndex}` );
+	await database.connect();
+	return await database.getJson( `khamenei_read_${chatId}_${verseRefIndex}` );
 }
 
 async function markTafsirNemunehAsRead ( chatId, verseRefIndex )
 {
-	return await globalThis.kvNamespace.putJson( `tafsir_read_${chatId}_${verseRefIndex}`, true );
+	await database.connect();
+	return await database.putJson( `tafsir_read_${chatId}_${verseRefIndex}`, true );
 }
 
 async function markKhameneiAsRead ( chatId, verseRefIndex )
 {
-	return await globalThis.kvNamespace.putJson( `khamenei_read_${chatId}_${verseRefIndex}`, true );
+	await database.connect();
+	return await database.putJson( `khamenei_read_${chatId}_${verseRefIndex}`, true );
 }
 
 async function markTafsirNemunehAsUnread ( chatId, verseRefIndex )
 {
-	return await globalThis.kvNamespace.delete( `tafsir_read_${chatId}_${verseRefIndex}` );
+	await database.connect();
+	return await database.delete( `tafsir_read_${chatId}_${verseRefIndex}` );
 }
 
 async function markKhameneiAsUnread ( chatId, verseRefIndex )
 {
-	return await globalThis.kvNamespace.delete( `khamenei_read_${chatId}_${verseRefIndex}` );
+	await database.connect();
+	return await database.delete( `khamenei_read_${chatId}_${verseRefIndex}` );
 }
 
 function canAddToMessage ( totalLength, newText, part )
@@ -367,7 +374,5 @@ module.exports = {
 	isTafsirNemunehReadByUser,
 	isKhameneiReadByUser,
 	markTafsirNemunehAsRead,
-	markKhameneiAsRead,
-	markTafsirNemunehAsUnread,
 	markKhameneiAsUnread
-};
+}

@@ -65,7 +65,7 @@ module.exports = async ( req, res ) =>
 		console.log( "Processing update:", update.update_id );
 
 		const telegramClient = new TelegramClient({ fuse });
-
+		await telegramClient.handleUpdate( update );
 		console.log( "Acknowledging update:", update.update_id );
 		res.status( 200 ).send( "OK" );
 
