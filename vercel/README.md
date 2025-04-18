@@ -20,5 +20,6 @@ vercel env add REDIS_URL
 vercel
 vercel --prod
 
-https://tetebiane-vercel.vercel.app/api
+curl "https://tebiane-vercel.vercel.app/api?setup_webhook=true"
+
 ```

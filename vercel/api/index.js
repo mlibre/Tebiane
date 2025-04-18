@@ -146,6 +146,21 @@ bot.on( "webhook_error", ( error ) =>
 // This is the main function Vercel calls for each incoming request.
 module.exports = async ( req, res ) =>
 {
+	if ( req.query.setup_webhook === "true" )
+	{
+		console.log( "Received webhook setup request" );
+		try
+		{
+			await setupWebhook();
+			return res.status( 200 ).json({ success: true, message: "Webhook setup completed" });
+		}
+		catch ( error )
+		{
+			console.error( "Error setting up webhook:", error );
+			return res.status( 500 ).json({ success: false, error: error.message });
+		}
+	}
+
 	try
 	{
 		// The request body should contain the Telegram update JSON
@@ -180,11 +195,6 @@ module.exports = async ( req, res ) =>
 
 async function setupWebhook ()
 {
-	if ( !appUrl )
-	{
-		console.warn( "VERCEL_URL not set. Skipping webhook setup." );
-		return;
-	}
 	const webhookUrl = `https://${appUrl}${webhookPath}`;
 	try
 	{
