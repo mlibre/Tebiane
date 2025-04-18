@@ -62,10 +62,21 @@ bot.onText( /\/resources/, async ( msg, match ) =>
 
 bot.on( "callback_query", async ( callbackQuery ) =>
 {
-	const { data } = callbackQuery; // 'k1475_@1463,6155,106,1053,2000,6149,392,592'
+	const { data, id: callbackQueryId } = callbackQuery; // 'k1475_@1463,6155,106,1053,2000,6149,392,592'
 	const chatId = callbackQuery.message.chat.id
 	const messageId = callbackQuery.message.message_id
-	return await callback( bot, data, chatId, messageId );
+	try
+	{
+		return await callback( bot, data, chatId, messageId );
+	}
+	catch ( error )
+	{
+		console.error( "Error processing callback query:", error );
+	}
+	finally
+	{
+		await bot.answerCallbackQuery( callbackQueryId );
+	}
 });
 
 
