@@ -140,13 +140,20 @@ export default class TelegramClient
 			const chatId = update.callback_query.message.chat.id;
 			const messageId = update.callback_query.message.message_id;
 
-			// Use the callback handler
-			await handleCallback( this, data, chatId, messageId );
-
-			// Answer the callback query to remove the loading state
-			await this.makeRequest( "answerCallbackQuery", {
-				callback_query_id: update.callback_query.id
-			});
+			try
+			{
+				await handleCallback( this, data, chatId, messageId );
+			}
+			catch ( error )
+			{
+				this.log( "error", error );
+			}
+			finally
+			{
+				await this.makeRequest( "answerCallbackQuery", {
+					callback_query_id: update.callback_query.id
+				});
+			}
 
 			return;
 		}
