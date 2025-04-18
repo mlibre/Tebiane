@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Tebiane Quran Bot for Vercel",
   "main": "api/index.js",
-  "private": true,
   "license": "UNLICENSED",
   "author": "mlibre",
   "scripts": {

@@ -8,17 +8,26 @@ class RedisDatabase
 	{
 		this.redis = createClient({ url: redisUrl });
 		this.redis.on( "error", err => { return console.error( "Redis Client Error", err ) });
+		this.connected = false;
 	}
 
 	async connect ()
 	{
+		if ( this.connected ) return;
 		try
 		{
-			return await this.redis.connect();
+			if ( this.redis.isReady )
+			{
+				this.connected = true;
+				return;
+			}
+			await this.redis.connect();
+			this.connected = true;
 		}
 		catch ( e )
 		{
 			console.error( "Error connecting to Redis:", e );
+			this.connected = false;
 		}
 	}
 
@@ -105,6 +114,7 @@ class RedisDatabase
 		try
 		{
 			await this.redis.disconnect();
+			this.connected = false;
 		}
 		catch ( e )
 		{
@@ -113,4 +123,4 @@ class RedisDatabase
 	}
 }
 
-module.exports = RedisDatabase;
+module.exports = new RedisDatabase;

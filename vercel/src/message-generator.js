@@ -1,4 +1,4 @@
-const { all_translations, perian_translations, actionCodes } = require( "./config.js" );
+const { all_translations, perian_translations, actionCodes, quranData } = require( "./config.js" );
 const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers.js" );
 
 function generateMessage ( refIndex, transaltionCode = actionCodes.makarem )
@@ -11,18 +11,18 @@ function generateMessage ( refIndex, transaltionCode = actionCodes.makarem )
 		currentAyahPersianNumber
 	} = extractInfoByRefIndex( refIndex );
 
-	const currentAyah = globalThis.quranData[refIndex];
+	const currentAyah = quranData[refIndex];
 	let prevAyah = null;
 	let nextAyah = null;
 
-	if ( refIndex - 1 >= 0 && globalThis.quranData[refIndex - 1].surah.number === currentSurahNumber )
+	if ( refIndex - 1 >= 0 && quranData[refIndex - 1].surah.number === currentSurahNumber )
 	{
-		prevAyah = globalThis.quranData[refIndex - 1];
+		prevAyah = quranData[refIndex - 1];
 	}
 
-	if ( refIndex + 1 < globalThis.quranData.length && globalThis.quranData[refIndex + 1].surah.number === currentSurahNumber )
+	if ( refIndex + 1 < quranData.length && quranData[refIndex + 1].surah.number === currentSurahNumber )
 	{
-		nextAyah = globalThis.quranData[refIndex + 1];
+		nextAyah = quranData[refIndex + 1];
 	}
 
 	const translator = all_translations[transaltionCode];

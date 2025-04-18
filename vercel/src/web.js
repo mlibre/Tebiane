@@ -1,19 +1,12 @@
 const { JSDOM } = require( "jsdom" );
 const { Readability } = require( "@mozilla/readability" );
 const { CACHE_TTL_SECONDS } = require( "./config.js" );
-const RedisDatabase = require( "./database.js" );
+const database = require( "./database.js" );
 
-// Initialize database connection
-const database = new RedisDatabase();
-let dbConnected = false;
 
 async function ensureDbConnection ()
 {
-	if ( !dbConnected )
-	{
-		await database.connect();
-		dbConnected = true;
-	}
+	await database.connect();
 }
 
 // Helper functions for cache operations
