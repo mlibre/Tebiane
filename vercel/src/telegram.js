@@ -29,7 +29,7 @@ class TelegramClient
 			{
 				if ( this.isNetworkError( error ) )
 				{
-					console.log( `Retrying... Attempts left: ${retries - i - 1}` );
+					console.log( `Retrying... Attempts left: ${retries - i - 1}`, error.cause, error.message );
 					await this.sleep( delay );
 				}
 				else

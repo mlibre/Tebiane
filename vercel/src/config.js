@@ -98,7 +98,7 @@ const all_translations = { ...perian_translations, ...arabic_texts };
 const fuseKeys = [
 	{ name: "surah.number", weight: 1 }, // 1
 	{ name: "surah.persian_number", weight: 1 }, // ۱
-	{ name: "surah.arabic", weight: 1.2 }, // ٱلْفَاتِحَة
+	{ name: "surah.arabic", weight: 1.4 }, // ٱلْفَاتِحَة
 	{ name: "surah.farsi", weight: 1.2 }, // فاتحه
 	{ name: "ayah", weight: 1.2 }, // 1
 	{ name: "ayah_persian", weight: 1.2 }, // ۱
