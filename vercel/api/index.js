@@ -7,6 +7,11 @@ const util = require( "node:util" );
 const { sourcesText, quranData } = require( "../src/config" );
 
 const searchDocument = new FlexSearch.Document({
+	tokenize: "strict",
+	fastupdate: true,
+	encoder: FlexSearch.Charset.LatinExtra,
+	resolution: 9,
+	cache: 1000,
 	document: {
 		store: true,
 		id: "id",
@@ -25,10 +30,6 @@ const searchDocument = new FlexSearch.Document({
 			"verse:arabic_enhanced"
 		]
 	},
-	fastupdate: true,
-	encoder: FlexSearch.Charset.LatinExtra,
-	resolution: 9,
-	cache: 1000,
 });
 
 quranData.forEach( item =>

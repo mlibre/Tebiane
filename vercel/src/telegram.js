@@ -158,20 +158,49 @@ class TelegramClient
 		await this.sendMessageWithRetry( chatId, resourcesMessage, { parse_mode: "MarkdownV2" });
 	}
 
-	async search ( text, chatId, messageId )
+	performCombinedSearch ( query )
 	{
-		const userInput = text.replace( /^\/search\s*/, "" );
+		// Get exact matches
+		const exactResults = this.searchIndex.search({
+			query,
+			enrich: true,
+			merge: true
+		});
 
-		const fieldResults = this.searchIndex.search({
-			query: userInput,
+		// Get suggested matches
+		const suggestedResults = this.searchIndex.search({
+			query,
 			suggest: true,
 			enrich: true,
 			merge: true
-		})
-		//  = await this.searchIndex.search( userInput );
-		// index.search(query, {
-		//     index: "contents:body:title" search on an specfic field to increase performance, stops at max 12 results
-		// });
+		});
+
+		// Merge results, removing duplicates by ID
+		const combinedResultsMap = new Map();
+
+		// Add exact matches first (higher priority)
+		exactResults.forEach( result =>
+		{
+			combinedResultsMap.set( result.id, result );
+		});
+
+		// Add suggested matches if not already included
+		suggestedResults.forEach( result =>
+		{
+			if ( !combinedResultsMap.has( result.id ) )
+			{
+				combinedResultsMap.set( result.id, result );
+			}
+		});
+
+		// Convert map back to array
+		return Array.from( combinedResultsMap.values() );
+	}
+
+	async search ( text, chatId, messageId )
+	{
+		const userInput = text.replace( /^\/search\s*/, "" );
+		const fieldResults = this.performCombinedSearch( userInput );
 
 		if ( fieldResults.length > 0 )
 		{
