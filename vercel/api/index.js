@@ -2,6 +2,7 @@ const TelegramClient = require( "../src/telegram" );
 const FlexSearch = require( "flexsearch" );
 const path = require( "path" );
 const fs = require( "fs" );
+const util = require( "node:util" );
 
 const { sourcesText, quranData } = require( "../src/config" );
 
@@ -41,7 +42,7 @@ quranData.forEach( item =>
 // This is the main function Vercel calls for each incoming request.
 module.exports = async ( req, res ) =>
 {
-	console.log( "Incomming request:", req.body, req.params, req.query );
+	log( "Incomming request:", req.body, req.params, req.query );
 	const telegramClient = new TelegramClient({ searchIndex: searchDocument });
 
 	if ( req.query.register_webhook === "true" )
@@ -89,3 +90,8 @@ module.exports = async ( req, res ) =>
 		res.status( 500 ).send( "Internal Server Error" );
 	}
 };
+
+function log ( ...update )
+{
+	console.log( util.inspect( update, { showHidden: true, depth: null }) );
+}

@@ -50,6 +50,7 @@ class TelegramClient
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify( params ),
+			signal: AbortSignal.timeout( 30000 )
 		});
 
 		if ( !response.ok )
