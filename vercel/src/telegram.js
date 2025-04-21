@@ -7,13 +7,13 @@ const { handleCallback } = require( "./callback.js" );
 class TelegramClient
 {
 	constructor ({
-		fuse,
+		searchIndex,
 		baseUrl = "https://api.telegram.org"
 	})
 	{
 		this.token = token;
 		this.apiBaseUrl = `${baseUrl}/bot${token}`;
-		this.fuse = fuse;
+		this.searchIndex = searchIndex;
 		this.sources = sourcesText;
 	}
 
@@ -160,13 +160,22 @@ class TelegramClient
 	async search ( text, chatId, messageId )
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
-		// this.log( "search request", text, chatId, messageId, userInput );
-		const searchResult = this.fuse.search( userInput, 12 );
 
-		if ( searchResult.length > 0 )
+		const fieldResults = this.searchIndex.search({
+			query: userInput,
+			suggest: true,
+			enrich: true,
+			merge: true
+		})
+		//  = await this.searchIndex.search( userInput );
+		// index.search(query, {
+		//     index: "contents:body:title" search on an specfic field to increase performance, stops at max 12 results
+		// });
+
+		if ( fieldResults.length > 0 )
 		{
-			const { refIndex } = searchResult[0];
-			const refResults = searchResult.map( result => { return result.refIndex }).slice( 0, 8 );
+			const refIndex = fieldResults[0].id - 1; // Convert to 0-based index
+			const refResults = fieldResults.slice( 0, 8 ).map( result => { return result.id - 1 });
 			const message = generateMessage( refIndex, actionCodes.makarem );
 
 			await this.sendMessageWithRetry( chatId, message, {
@@ -190,7 +199,7 @@ class TelegramClient
 		}
 	}
 
-	async registerWebhook ( )
+	async registerWebhook ()
 	{
 		const response = await this.makeRequest( "setWebhook", {
 			url: `${productionUrl}${webhookPath}`,

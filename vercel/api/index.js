@@ -1,27 +1,48 @@
 const TelegramClient = require( "../src/telegram" );
-const Fuse = require( "fuse.js" );
+const FlexSearch = require( "flexsearch" );
 const path = require( "path" );
 const fs = require( "fs" );
 
-const { fuseKeys, sourcesText, quranData } = require( "../src/config" );
+const { sourcesText, quranData } = require( "../src/config" );
 
-const fuseIndex = Fuse.createIndex( fuseKeys, quranData );
-const fuse = new Fuse( quranData, {
-	isCaseSensitive: false,
-	includeScore: false,
-	includeMatches: false,
-	useExtendedSearch: false,
-	ignoreLocation: true,
-	threshold: 0.8,
-	keys: fuseKeys,
-}, fuseIndex );
+const searchDocument = new FlexSearch.Document({
+	document: {
+		store: true,
+		id: "id",
+		index: [
+			"verse:arabic_clean",
+			"ayah",
+			"surah:number",
+			"surah:persian_number",
+			"surah:arabic",
+			"ayah_persian",
+			"surah:farsi",
+			"verse:farsi_makarem",
+			"verse:farsi_ansarian",
+			"verse:farsi_fooladvand",
+			"verse:farsi_mojtabavi",
+			"verse:arabic_enhanced"
+		]
+	},
+	fastupdate: true,
+	encoder: FlexSearch.Charset.LatinExtra,
+	resolution: 9,
+	cache: 1000,
+});
+
+quranData.forEach( item =>
+{
+	item.ayah = item.ayah.toString();
+	item.surah.number = item.surah.number.toString();
+	searchDocument.add( item );
+});
 
 // --- Vercel Serverless Function Handler ---
 // This is the main function Vercel calls for each incoming request.
 module.exports = async ( req, res ) =>
 {
 	console.log( "Incomming request:", req.body, req.params, req.query );
-	const telegramClient = new TelegramClient({ fuse });
+	const telegramClient = new TelegramClient({ searchIndex: searchDocument });
 
 	if ( req.query.register_webhook === "true" )
 	{
@@ -36,7 +57,6 @@ module.exports = async ( req, res ) =>
 			return res.status( 500 ).json({ success: false, error: error.message });
 		}
 	}
-
 	else if ( req.query.unregister_webhook === "true" )
 	{
 		try
