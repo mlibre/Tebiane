@@ -1,4 +1,4 @@
-const { actionCodes, markdownCodes, MESSAGE_LENGTH_LIMIT } = require( "./config.js" );
+const { actionCodes, markdownCodes, messageLength } = require( "./config.js" );
 const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers.js" );
 const { getReadabilityOutput, fetchHtmlWithCache } = require( "./web.js" );
 const { JSDOM } = require( "jsdom" );
@@ -179,8 +179,8 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 
 		if ( fishChunk )
 		{
-			const startPos = part * MESSAGE_LENGTH_LIMIT;
-			const endPos = ( part + 1 ) * MESSAGE_LENGTH_LIMIT;
+			const startPos = part * messageLength;
+			const endPos = ( part + 1 ) * messageLength;
 			const partText = fishChunk.substring( startPos, endPos );
 
 			if ( partText )
@@ -239,7 +239,7 @@ async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber
 		totalLength += element.textContent.trim().length;
 	});
 
-	return Math.ceil( totalLength / MESSAGE_LENGTH_LIMIT );
+	return Math.ceil( totalLength / messageLength );
 }
 
 async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
@@ -309,7 +309,7 @@ async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumb
 		});
 
 		const totalLength = processedLines.join( "\n" ).length;
-		return Math.ceil( totalLength / MESSAGE_LENGTH_LIMIT );
+		return Math.ceil( totalLength / messageLength );
 	}
 
 	return 0;
@@ -353,8 +353,8 @@ async function markKhameneiAsUnread ( chatId, verseRefIndex )
 
 function canAddToMessage ( totalLength, newText, part )
 {
-	const start = part * MESSAGE_LENGTH_LIMIT;
-	const end = ( part + 1 ) * MESSAGE_LENGTH_LIMIT;
+	const start = part * messageLength;
+	const end = ( part + 1 ) * messageLength;
 
 	if ( totalLength + newText.length > end )
 	{
