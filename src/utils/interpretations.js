@@ -1,34 +1,46 @@
-const cheerio = require( "cheerio" );
-const { messageLength, actionCodes, markdownCodes } = require( "../configs" );
-const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers" );
-const { getReadabilityOutput, fetchHtml } = require( "./web" );
+const { actionCodes, markdownCodes, messageLength } = require( "./config.js" );
+const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers.js" );
+const { getReadabilityOutput, fetchHtml } = require( "./web.js" );
+const { JSDOM } = require( "jsdom" );
 const database = require( "../database" );
 
-exports.generateSaanNuzulMessage = async function ( verseRefIndex )
+async function generateSaanNuzulMessage ( verseRefIndex )
 {
-	const { currentSurahTitle, currentSurahTitlePersian, currentSurahNumber,
-		currentSurahPersianNumber, currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+	const {
+		currentSurahTitle,
+		currentSurahTitlePersian,
+		currentSurahNumber,
+		currentSurahPersianNumber,
+		currentAyahNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://wiki.ahlolbait.com/آیه_${currentAyahNumber}_سوره_${currentSurahTitlePersian}`;
-	const htmlString = await fetchHtml( url );
-	const $ = cheerio.load( htmlString );
+	const htmlString = await fetchHtmlWithCache( url );
+
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( htmlString );
+	const doc = dom.window.document;
 
 	const saanNuzulTexts = [];
 	const headerTest = `> ${currentSurahTitle} 🕊️ شان نزول 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 	saanNuzulTexts.push( normalizeMessage( headerTest ) );
 
-	const nuzulSection = $( ".mw-parser-output" ).find( "h2" ).filter( function ()
-	{
-		return $( this ).text().trim() === "نزول";
-	}).nextUntil( "h2" );
+	// Find the nuzul section
+	const headers = Array.from( doc.querySelectorAll( ".mw-parser-output h2" ) );
+	const nuzulHeader = headers.find( h => { return h.textContent.trim() === "نزول" });
 
-	if ( nuzulSection.length > 0 )
+	if ( nuzulHeader )
 	{
-		nuzulSection.each( ( index, element ) =>
+		let currentElement = nuzulHeader.nextElementSibling;
+		while ( currentElement && currentElement.tagName !== "H2" )
 		{
-			const saanNuzulChunk = $( element ).text();
-			saanNuzulTexts.push( normalizeMessage( saanNuzulChunk ) );
-		});
+			if ( currentElement.textContent.trim() )
+			{
+				saanNuzulTexts.push( normalizeMessage( currentElement.textContent.trim() ) );
+			}
+			currentElement = currentElement.nextElementSibling;
+		}
 	}
 	else
 	{
@@ -39,14 +51,22 @@ exports.generateSaanNuzulMessage = async function ( verseRefIndex )
 	return saanNuzulTexts.join( "\n\n" );
 }
 
-exports.generateTafsirNemunehMessage = async function ( verseRefIndex, part )
+async function generateTafsirNemunehMessage ( verseRefIndex, part )
 {
-	const { currentSurahTitle, currentSurahNumber, currentSurahPersianNumber,
-		currentAyahNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+	const {
+		currentSurahTitle,
+		currentSurahNumber,
+		currentSurahPersianNumber,
+		currentAyahNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( rdrview );
+
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
 	const translationTexts = [];
 	let totalMessageLength = 0;
@@ -54,41 +74,38 @@ exports.generateTafsirNemunehMessage = async function ( verseRefIndex, part )
 	const headerTest = `> ${currentSurahTitle} 🕊️ تفسیر نمونه 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 
 	translationTexts.push( normalizeMessage( headerTest ) );
-	const element = $( ".page" );
+	const element = doc.querySelector( ".page" );
 
-	if ( element.length > 0 )
+	if ( element )
 	{
-		const elementsAfterFirstH3 = element.find( "p, h3, h6" );
-		elementsAfterFirstH3.each( ( index, element ) =>
+		const elementsAfterFirstH3 = element.querySelectorAll( "p, h3, h6" );
+		for ( const element of elementsAfterFirstH3 )
 		{
-			if ( limitReached ) return;
-			const tafsirChunk = $( element ).text().trim();
-			if ( !tafsirChunk ) return;
+			if ( limitReached ) break;
+
+			const tafsirChunk = element.textContent.trim();
+			if ( !tafsirChunk ) continue;
 
 			const addMessage = canAddToMessage( totalMessageLength, tafsirChunk, part );
 			if ( addMessage === -1 )
 			{
 				limitReached = true;
-				return false;
+				break;
 			}
 
 			if ( addMessage )
 			{
-				if ( element.name === "p" )
+				if ( element.tagName === "P" )
 				{
 					translationTexts.push( normalizeMessage( tafsirChunk ) );
 				}
-				else if ( element.name === "h3" || element.name === "h6" )
+				else if ( element.tagName === "H3" || element.tagName === "H6" )
 				{
 					translationTexts.push( normalizeMessage( `📝 ${markdownCodes.bold}${tafsirChunk}${markdownCodes.bold}` ) );
 				}
-				// else if ( element.name == "h5" )
-				// {
-				// 	translationTexts.push( normalizeMessage( `📓 ${tafsirChunk}` ) );
-				// }
 			}
 			totalMessageLength += tafsirChunk.length;
-		});
+		}
 	}
 
 	if ( translationTexts.length <= 1 )
@@ -100,54 +117,131 @@ exports.generateTafsirNemunehMessage = async function ( verseRefIndex, part )
 	return translationTexts.join( "\n\n" );
 }
 
-exports.generateKhameneiMessage = async function ( verseRefIndex, part )
+async function generateKhameneiMessage ( verseRefIndex, part )
 {
-	const { currentSurahNumber, currentAyahNumber, currentSurahTitle,
-		currentSurahPersianNumber, currentAyahPersianNumber } = extractInfoByRefIndex( verseRefIndex );
+	const {
+		currentSurahNumber,
+		currentAyahNumber,
+		currentSurahTitle,
+		currentSurahPersianNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
 
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	console.log( url );
 
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( rdrview );
+
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
 	const fishTexts = [];
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 	fishTexts.push( normalizeMessage( headerText ) );
 
-	$( "header" ).before( "<br>BOLDTEXT" );
-	$( "p" ).before( "<br>" );
-	$( "br" ).replaceWith( "BREAKLINE" );
-	$( "hr" ).replaceWith( "FOOTERLINE" );
-	const fishChunk = $( "#npTL" ).text().trim();
-
-	if ( fishChunk )
+	// Get the verse text and translation from the beginning
+	const verseContainer = doc.querySelector( "#npTL > p" );
+	if ( verseContainer )
 	{
+		// Get the HTML content and replace <br> tags with newlines
+		const htmlContent = verseContainer.innerHTML;
+		const textContent = htmlContent
+		.replace( /<br>/gi, "\n" )
+		.replace( /<[^>]*>/g, "" ); // Remove all HTML tags
+
+		// Format the first line (surah and verse info) as bold
+		const lines = textContent.split( "\n" );
+		let formattedText = "";
+
+		if ( lines.length > 0 )
+		{
+			// Bold the first line which contains surah name and verse number
+			formattedText += `${markdownCodes.bold}${lines[0].trim()}${markdownCodes.bold}\n`;
+
+			// Add the rest of the content
+			if ( lines.length > 1 )
+			{
+				formattedText += lines.slice( 1 ).join( "\n" ).trim();
+			}
+		}
+
+		fishTexts.push( normalizeMessage( `📜 ${formattedText}` ) );
+	}
+
+	// Find all articles in the document
+	const articles = doc.querySelectorAll( "#npTL article" );
+
+	if ( articles && articles.length > 0 )
+	{
+		let allContent = "";
+
+		// Process each article
+		articles.forEach( article =>
+		{
+			// Get the header text
+			const header = article.querySelector( "header" );
+			let headerText = "";
+
+			if ( header )
+			{
+				headerText = `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
+			}
+
+			// Find date in the article body
+			const body = article.querySelector( "[itemprop='articleBody']" );
+			let bodyText = "";
+			let dateText = "";
+
+			if ( body )
+			{
+				bodyText = body.textContent.trim();
+
+				// Extract date if it exists
+				const dateMatch = bodyText.match( /(\d{4}\/\d{2}\/\d{2})/ );
+				if ( dateMatch )
+				{
+					dateText = `📅 تاریخ: ${dateMatch[0]}`;
+					// Remove the date from the body text
+					bodyText = bodyText.replace( dateMatch[0], "" );
+				}
+			}
+
+			// Add header with date if found
+			allContent += headerText;
+			if ( dateText )
+			{
+				allContent += `\n${dateText}`;
+			}
+			allContent += "\n\n";
+
+			// Add the body text
+			if ( bodyText )
+			{
+				allContent += `${bodyText}\n\n`;
+			}
+
+			// Get the references section (after the hr)
+			const hr = article.querySelector( "hr" );
+			if ( hr )
+			{
+				allContent += "\n🔖 ارجاعات\n\n";
+				const references = hr.parentNode.querySelectorAll( "p" );
+				references.forEach( ref =>
+				{
+					allContent += `${ref.textContent.trim()}\n\n`;
+				});
+			}
+		});
+
+		// Split the content based on the part requested
 		const startPos = part * messageLength;
 		const endPos = ( part + 1 ) * messageLength;
-		const partText = fishChunk.substring( startPos, endPos );
-		if ( partText )
-		{
-			// Modify this part to handle headers
-			let lines = partText.split( "BREAKLINE" );
-			// some lines are empty, so we need to filter them out
-			lines = lines.filter( line => { return line.trim() !== "" });
-			const processedLines = lines.map( line =>
-			{
-				line = line.trim();
-				if ( line.includes( "BOLDTEXT" ) )
-				{
-					line = line.replace( "BOLDTEXT", "" );
-					return normalizeMessage( `\n📝 ${markdownCodes.bold}${line.trim()}${markdownCodes.bold}\n` );
-				}
-				else if ( line.includes( "FOOTERLINE" ) )
-				{
-					return normalizeMessage( "\n🔖 ارجاعات" );
-				}
-				return normalizeMessage( line );
-			});
+		const partText = allContent.substring( startPos, endPos );
 
-			fishTexts.push( processedLines.join( "\n" ) );
+		if ( partText.trim() )
+		{
+			fishTexts.push( normalizeMessage( partText.trim() ) );
 		}
 	}
 
@@ -160,71 +254,112 @@ exports.generateKhameneiMessage = async function ( verseRefIndex, part )
 	return fishTexts.join( "\n\n" );
 }
 
-exports.calculateTotalTafsirParts = async function ( currentSurahNumber, currentAyahNumber )
+async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
+{
+	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
+	const rdrview = await getReadabilityOutput( url );
+
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
+
+	// Find all articles in the document
+	const articles = doc.querySelectorAll( "#npTL article" );
+
+	if ( !articles || articles.length === 0 ) return 0;
+
+	let allContent = "";
+
+	// Process each article
+	articles.forEach( article =>
+	{
+		// Get the header text
+		const header = article.querySelector( "header" );
+		if ( header )
+		{
+			allContent += `\n📝 ${header.textContent.trim()}\n\n`;
+		}
+
+		// Get the article body
+		const body = article.querySelector( "[itemprop='articleBody']" );
+		if ( body )
+		{
+			allContent += `${body.textContent.trim() }\n\n`;
+		}
+
+		// Get the references section (after the hr)
+		const hr = article.querySelector( "hr" );
+		if ( hr )
+		{
+			allContent += "\n🔖 ارجاعات\n\n";
+			const references = hr.parentNode.querySelectorAll( "p" );
+			references.forEach( ref =>
+			{
+				allContent += `${ref.textContent.trim() }\n\n`;
+			});
+		}
+	});
+
+	return Math.ceil( allContent.length / messageLength );
+}
+
+async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
 {
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( rdrview );
 
-	const pageElement = $( ".page" );
-	if ( pageElement.length === 0 ) return 0;
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
 
-	const tafsirElements = pageElement.find( "p, h3, h6" );
+	const pageElement = doc.querySelector( ".page" );
+	if ( !pageElement ) return 0;
+
+	const tafsirElements = pageElement.querySelectorAll( "p, h3, h6" );
 	let totalLength = 0;
-	tafsirElements.each( ( index, element ) =>
+
+	tafsirElements.forEach( element =>
 	{
-		totalLength += $( element ).text().trim().length;
+		totalLength += element.textContent.trim().length;
 	});
 
 	return Math.ceil( totalLength / messageLength );
 }
 
-exports.calculateTotalKhameneiParts = async function ( currentSurahNumber, currentAyahNumber )
+async function isTafsirNemunehReadByUser ( chatId, verseRefIndex )
 {
-	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
-	const rdrview = await getReadabilityOutput( url );
-	const $ = cheerio.load( rdrview );
-
-	$( "header" ).before( "<br>BOLDTEXT" );
-	$( "p" ).before( "<br>" );
-	$( "br" ).replaceWith( "BREAKLINE" );
-	$( "hr" ).replaceWith( "FOOTERLINE" );
-	const fishChunk = $( "#npTL" ).text().trim();
-
-	if ( fishChunk )
-	{
-		let lines = fishChunk.split( "BREAKLINE" );
-		lines = lines.filter( line => { return line.trim() !== "" });
-
-		const processedLines = lines.map( line =>
-		{
-			line = line.trim();
-			if ( line.includes( "BOLDTEXT" ) )
-			{
-				line = line.replace( "BOLDTEXT", "" ).trim();
-				return `📝 ${line}`;
-			}
-			else if ( line.includes( "FOOTERLINE" ) )
-			{
-				return "🔖 ارجاعات";
-			}
-			return line;
-		});
-
-		const totalLength = processedLines.join( "\n" ).length;
-		return Math.ceil( totalLength / messageLength );
-	}
-
-	return 0;
-}
-exports.isTafsirNemunehReadByUser = async function ( chatId, verseRefIndex )
-{
-	return await database.getTafsir( `${chatId}${verseRefIndex}` );
+	await database.connect();
+	return await database.getJson( `tafsir_read_${chatId}_${verseRefIndex}` );
 }
 
-exports.isKhameneiReadByUser = async function ( chatId, verseRefIndex )
+async function isKhameneiReadByUser ( chatId, verseRefIndex )
 {
-	return await database.getKhamenei( `${chatId}${verseRefIndex}` );
+	await database.connect();
+	return await database.getJson( `khamenei_read_${chatId}_${verseRefIndex}` );
+}
+
+async function markTafsirNemunehAsRead ( chatId, verseRefIndex )
+{
+	await database.connect();
+	return await database.putJson( `tafsir_read_${chatId}_${verseRefIndex}`, true );
+}
+
+async function markKhameneiAsRead ( chatId, verseRefIndex )
+{
+	await database.connect();
+	return await database.putJson( `khamenei_read_${chatId}_${verseRefIndex}`, true );
+}
+
+async function markTafsirNemunehAsUnread ( chatId, verseRefIndex )
+{
+	await database.connect();
+	return await database.delete( `tafsir_read_${chatId}_${verseRefIndex}` );
+}
+
+async function markKhameneiAsUnread ( chatId, verseRefIndex )
+{
+	await database.connect();
+	return await database.delete( `khamenei_read_${chatId}_${verseRefIndex}` );
 }
 
 function canAddToMessage ( totalLength, newText, part )
@@ -238,5 +373,17 @@ function canAddToMessage ( totalLength, newText, part )
 	}
 
 	return totalLength + newText.length >= start &&
-		   totalLength + newText.length <= end;
+         totalLength + newText.length <= end;
+}
+
+module.exports = {
+	generateSaanNuzulMessage,
+	generateTafsirNemunehMessage,
+	generateKhameneiMessage,
+	calculateTotalTafsirParts,
+	calculateTotalKhameneiParts,
+	isTafsirNemunehReadByUser,
+	isKhameneiReadByUser,
+	markTafsirNemunehAsRead,
+	markKhameneiAsUnread
 }
