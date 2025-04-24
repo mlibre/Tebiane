@@ -140,6 +140,17 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 	fishTexts.push( normalizeMessage( headerText ) );
 
+	// Get the verse text and translation from the beginning
+	const verseContainer = doc.querySelector( "#npTL > p" );
+	if ( verseContainer )
+	{
+		const verseText = verseContainer.textContent.trim();
+		if ( verseText )
+		{
+			fishTexts.push( normalizeMessage( `📜 ${verseText}` ) );
+		}
+	}
+
 	// Find all articles in the document
 	const articles = doc.querySelectorAll( "#npTL article" );
 
@@ -161,7 +172,7 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 			const body = article.querySelector( "[itemprop='articleBody']" );
 			if ( body )
 			{
-				allContent += `${body.textContent.trim() }\n\n`;
+				allContent += `${body.textContent.trim()}\n\n`;
 			}
 
 			// Get the references section (after the hr)
@@ -172,7 +183,7 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 				const references = hr.parentNode.querySelectorAll( "p" );
 				references.forEach( ref =>
 				{
-					allContent += `${ref.textContent.trim() }\n\n`;
+					allContent += `${ref.textContent.trim()}\n\n`;
 				});
 			}
 		});
@@ -196,6 +207,7 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	fishTexts.push( `[🔗 لینک به وب سایت](${url})` );
 	return fishTexts.join( "\n\n" );
 }
+
 
 async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
 {
