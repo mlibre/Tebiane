@@ -144,11 +144,29 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	const verseContainer = doc.querySelector( "#npTL > p" );
 	if ( verseContainer )
 	{
-		const verseText = verseContainer.textContent.trim();
-		if ( verseText )
+		// Get the HTML content and replace <br> tags with newlines
+		const htmlContent = verseContainer.innerHTML;
+		const textContent = htmlContent
+		.replace( /<br>/gi, "\n" )
+		.replace( /<[^>]*>/g, "" ); // Remove all HTML tags
+
+		// Format the first line (surah and verse info) as bold
+		const lines = textContent.split( "\n" );
+		let formattedText = "";
+
+		if ( lines.length > 0 )
 		{
-			fishTexts.push( normalizeMessage( `📜 ${verseText}` ) );
+			// Bold the first line which contains surah name and verse number
+			formattedText += `${markdownCodes.bold}${lines[0].trim()}${markdownCodes.bold}\n`;
+
+			// Add the rest of the content
+			if ( lines.length > 1 )
+			{
+				formattedText += lines.slice( 1 ).join( "\n" ).trim();
+			}
 		}
+
+		fishTexts.push( normalizeMessage( `📜 ${formattedText}` ) );
 	}
 
 	// Find all articles in the document
@@ -207,7 +225,6 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	fishTexts.push( `[🔗 لینک به وب سایت](${url})` );
 	return fishTexts.join( "\n\n" );
 }
-
 
 async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
 {
