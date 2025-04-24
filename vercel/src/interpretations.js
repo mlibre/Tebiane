@@ -140,73 +140,51 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 	fishTexts.push( normalizeMessage( headerText ) );
 
-	// Prepare the document for processing
-	const npTL = doc.querySelector( "#npTL" );
-	if ( npTL )
+	// Find all articles in the document
+	const articles = doc.querySelectorAll( "#npTL article" );
+
+	if ( articles && articles.length > 0 )
 	{
-		// Convert the DOM structure to a format we can process
-		const headers = npTL.querySelectorAll( "header" );
-		headers.forEach( header =>
+		let allContent = "";
+
+		// Process each article
+		articles.forEach( article =>
 		{
-			const boldText = doc.createElement( "br" );
-			boldText.textContent = "BOLDTEXT";
-			header.parentNode.insertBefore( boldText, header );
-		});
-
-		const paragraphs = npTL.querySelectorAll( "p" );
-		paragraphs.forEach( p =>
-		{
-			const br = doc.createElement( "br" );
-			p.parentNode.insertBefore( br, p );
-		});
-
-		// Replace <br> with text markers
-		const brs = npTL.querySelectorAll( "br" );
-		brs.forEach( br =>
-		{
-			const textNode = doc.createTextNode( "BREAKLINE" );
-			br.parentNode.replaceChild( textNode, br );
-		});
-
-		const hrs = npTL.querySelectorAll( "hr" );
-		hrs.forEach( hr =>
-		{
-			const textNode = doc.createTextNode( "FOOTERLINE" );
-			hr.parentNode.replaceChild( textNode, hr );
-		});
-
-		const fishChunk = npTL.textContent.trim();
-
-		if ( fishChunk )
-		{
-			const startPos = part * messageLength;
-			const endPos = ( part + 1 ) * messageLength;
-			const partText = fishChunk.substring( startPos, endPos );
-
-			if ( partText )
+			// Get the header text
+			const header = article.querySelector( "header" );
+			if ( header )
 			{
-				// Process the text
-				let lines = partText.split( "BREAKLINE" );
-				// Filter out empty lines
-				lines = lines.filter( line => { return line.trim() !== "" });
-
-				const processedLines = lines.map( line =>
-				{
-					line = line.trim();
-					if ( line.includes( "BOLDTEXT" ) )
-					{
-						line = line.replace( "BOLDTEXT", "" );
-						return normalizeMessage( `\n📝 ${markdownCodes.bold}${line.trim()}${markdownCodes.bold}\n` );
-					}
-					else if ( line.includes( "FOOTERLINE" ) )
-					{
-						return normalizeMessage( "\n🔖 ارجاعات" );
-					}
-					return normalizeMessage( line );
-				});
-
-				fishTexts.push( processedLines.join( "\n" ) );
+				allContent += `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}\n\n`;
 			}
+
+			// Get the article body
+			const body = article.querySelector( "[itemprop='articleBody']" );
+			if ( body )
+			{
+				allContent += `${body.textContent.trim() }\n\n`;
+			}
+
+			// Get the references section (after the hr)
+			const hr = article.querySelector( "hr" );
+			if ( hr )
+			{
+				allContent += "\n🔖 ارجاعات\n\n";
+				const references = hr.parentNode.querySelectorAll( "p" );
+				references.forEach( ref =>
+				{
+					allContent += `${ref.textContent.trim() }\n\n`;
+				});
+			}
+		});
+
+		// Split the content based on the part requested
+		const startPos = part * messageLength;
+		const endPos = ( part + 1 ) * messageLength;
+		const partText = allContent.substring( startPos, endPos );
+
+		if ( partText.trim() )
+		{
+			fishTexts.push( normalizeMessage( partText.trim() ) );
 		}
 	}
 
@@ -217,6 +195,55 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 
 	fishTexts.push( `[🔗 لینک به وب سایت](${url})` );
 	return fishTexts.join( "\n\n" );
+}
+
+async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
+{
+	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
+	const rdrview = await getReadabilityOutput( url );
+
+	// Use JSDOM instead of DOMParser
+	const dom = new JSDOM( rdrview );
+	const doc = dom.window.document;
+
+	// Find all articles in the document
+	const articles = doc.querySelectorAll( "#npTL article" );
+
+	if ( !articles || articles.length === 0 ) return 0;
+
+	let allContent = "";
+
+	// Process each article
+	articles.forEach( article =>
+	{
+		// Get the header text
+		const header = article.querySelector( "header" );
+		if ( header )
+		{
+			allContent += `\n📝 ${header.textContent.trim()}\n\n`;
+		}
+
+		// Get the article body
+		const body = article.querySelector( "[itemprop='articleBody']" );
+		if ( body )
+		{
+			allContent += `${body.textContent.trim() }\n\n`;
+		}
+
+		// Get the references section (after the hr)
+		const hr = article.querySelector( "hr" );
+		if ( hr )
+		{
+			allContent += "\n🔖 ارجاعات\n\n";
+			const references = hr.parentNode.querySelectorAll( "p" );
+			references.forEach( ref =>
+			{
+				allContent += `${ref.textContent.trim() }\n\n`;
+			});
+		}
+	});
+
+	return Math.ceil( allContent.length / messageLength );
 }
 
 async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
@@ -240,79 +267,6 @@ async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber
 	});
 
 	return Math.ceil( totalLength / messageLength );
-}
-
-async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
-{
-	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
-	const rdrview = await getReadabilityOutput( url );
-
-	// Use JSDOM instead of DOMParser
-	const dom = new JSDOM( rdrview );
-	const doc = dom.window.document;
-
-	// Prepare the document
-	const npTL = doc.querySelector( "#npTL" );
-	if ( !npTL ) return 0;
-
-	// Convert the DOM structure to a format we can process
-	const headers = npTL.querySelectorAll( "header" );
-	headers.forEach( header =>
-	{
-		const boldText = doc.createElement( "br" );
-		boldText.textContent = "BOLDTEXT";
-		header.parentNode.insertBefore( boldText, header );
-	});
-
-	const paragraphs = npTL.querySelectorAll( "p" );
-	paragraphs.forEach( p =>
-	{
-		const br = doc.createElement( "br" );
-		p.parentNode.insertBefore( br, p );
-	});
-
-	// Replace <br> with text markers
-	const brs = npTL.querySelectorAll( "br" );
-	brs.forEach( br =>
-	{
-		const textNode = doc.createTextNode( "BREAKLINE" );
-		br.parentNode.replaceChild( textNode, br );
-	});
-
-	const hrs = npTL.querySelectorAll( "hr" );
-	hrs.forEach( hr =>
-	{
-		const textNode = doc.createTextNode( "FOOTERLINE" );
-		hr.parentNode.replaceChild( textNode, hr );
-	});
-
-	const fishChunk = npTL.textContent.trim();
-
-	if ( fishChunk )
-	{
-		let lines = fishChunk.split( "BREAKLINE" );
-		lines = lines.filter( line => { return line.trim() !== "" });
-
-		const processedLines = lines.map( line =>
-		{
-			line = line.trim();
-			if ( line.includes( "BOLDTEXT" ) )
-			{
-				line = line.replace( "BOLDTEXT", "" ).trim();
-				return `📝 ${line}`;
-			}
-			else if ( line.includes( "FOOTERLINE" ) )
-			{
-				return "🔖 ارجاعات";
-			}
-			return line;
-		});
-
-		const totalLength = processedLines.join( "\n" ).length;
-		return Math.ceil( totalLength / messageLength );
-	}
-
-	return 0;
 }
 
 async function isTafsirNemunehReadByUser ( chatId, verseRefIndex )
