@@ -266,28 +266,49 @@ async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumb
 	// Find all articles in the document
 	const articles = doc.querySelectorAll( "#npTL article" );
 
-	if ( !articles || articles.length === 0 ) return 0;
+	if ( !articles || articles.length === 0 ) return 1; // Return 1 to show "no content found" message
 
+	// We need to simulate exactly how the content is processed in generateKhameneiMessage
 	let allContent = "";
 
-	// Process each article
+	// Process each article exactly as in generateKhameneiMessage
 	articles.forEach( article =>
 	{
-		// Get the header text
 		const header = article.querySelector( "header" );
+		let headerText = "";
+
 		if ( header )
 		{
-			allContent += `\n📝 ${header.textContent.trim()}\n\n`;
+			headerText = `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
 		}
 
-		// Get the article body
 		const body = article.querySelector( "[itemprop='articleBody']" );
+		let bodyText = "";
+		let dateText = "";
+
 		if ( body )
 		{
-			allContent += `${body.textContent.trim() }\n\n`;
+			bodyText = body.textContent.trim();
+			const dateMatch = bodyText.match( /(\d{4}\/\d{2}\/\d{2})/ );
+			if ( dateMatch )
+			{
+				dateText = `📅 تاریخ: ${dateMatch[0]}`;
+				bodyText = bodyText.replace( dateMatch[0], "" );
+			}
 		}
 
-		// Get the references section (after the hr)
+		allContent += headerText;
+		if ( dateText )
+		{
+			allContent += `\n${dateText}`;
+		}
+		allContent += "\n\n";
+
+		if ( bodyText )
+		{
+			allContent += `${bodyText}\n\n`;
+		}
+
 		const hr = article.querySelector( "hr" );
 		if ( hr )
 		{
@@ -295,13 +316,35 @@ async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumb
 			const references = hr.parentNode.querySelectorAll( "p" );
 			references.forEach( ref =>
 			{
-				allContent += `${ref.textContent.trim() }\n\n`;
+				allContent += `${ref.textContent.trim()}\n\n`;
 			});
 		}
 	});
 
-	return Math.ceil( allContent.length / messageLength );
+	// Now determine how many actual parts we need
+	let actualParts = 0;
+	const contentLength = allContent.length;
+
+	// If there's no content, return 1 part
+	if ( contentLength === 0 ) return 1;
+
+	// Check each potential part to see if it contains meaningful content
+	for ( let part = 0; part < Math.ceil( contentLength / messageLength ); part++ )
+	{
+		const startPos = part * messageLength;
+		const endPos = ( part + 1 ) * messageLength;
+		const partText = allContent.substring( startPos, endPos ).trim();
+
+		if ( partText.length > 0 )
+		{
+			actualParts++;
+		}
+	}
+
+	// Ensure we return at least 1 part
+	return Math.max( 1, actualParts );
 }
+
 
 async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
 {
