@@ -181,16 +181,44 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 		{
 			// Get the header text
 			const header = article.querySelector( "header" );
+			let headerText = "";
+
 			if ( header )
 			{
-				allContent += `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}\n\n`;
+				headerText = `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
 			}
 
-			// Get the article body
+			// Find date in the article body
 			const body = article.querySelector( "[itemprop='articleBody']" );
+			let bodyText = "";
+			let dateText = "";
+
 			if ( body )
 			{
-				allContent += `${body.textContent.trim()}\n\n`;
+				bodyText = body.textContent.trim();
+
+				// Extract date if it exists
+				const dateMatch = bodyText.match( /(\d{4}\/\d{2}\/\d{2})/ );
+				if ( dateMatch )
+				{
+					dateText = `📅 تاریخ: ${dateMatch[0]}`;
+					// Remove the date from the body text
+					bodyText = bodyText.replace( dateMatch[0], "" );
+				}
+			}
+
+			// Add header with date if found
+			allContent += headerText;
+			if ( dateText )
+			{
+				allContent += `\n${dateText}`;
+			}
+			allContent += "\n\n";
+
+			// Add the body text
+			if ( bodyText )
+			{
+				allContent += `${bodyText}\n\n`;
 			}
 
 			// Get the references section (after the hr)
