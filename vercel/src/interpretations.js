@@ -342,10 +342,8 @@ async function calculateTotalKhameneiParts ( verseRefIndex )
 
 			allContent += articleText;
 		});
-
-		const chunkCount = Math.ceil( allContent.length / messageLength );
 	}
-	return Math.max( 1, chunkCount );
+	return Math.max( 1, Math.ceil( allContent.length / messageLength ) );
 }
 
 async function calculateTotalTafsirParts ( verseRefIndex )
