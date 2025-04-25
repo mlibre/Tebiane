@@ -254,7 +254,6 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	return fishTexts.join( "\n\n" );
 }
 
-
 async function calculateTotalKhameneiParts ( verseRefIndex )
 {
 	const {
