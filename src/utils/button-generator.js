@@ -32,8 +32,7 @@ async function createPaginatedButtons ({
 		buttonTextPrefix
 	} = buttonConfig;
 
-	const { currentSurahNumber, currentAyahNumber } = extractInfoByRefIndex( verseRefIndex );
-	const totalParts = await calculateTotalParts( currentSurahNumber, currentAyahNumber );
+	const totalParts = await calculateTotalParts( verseRefIndex );
 
 	const buttons = [];
 	for ( let index = 0; index < totalParts; index++ )

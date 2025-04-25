@@ -254,57 +254,110 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	return fishTexts.join( "\n\n" );
 }
 
-async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
+async function calculateTotalKhameneiParts ( verseRefIndex )
 {
+	const {
+		currentSurahNumber,
+		currentAyahNumber,
+		currentSurahTitle,
+		currentSurahPersianNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
+
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-
-	// Use JSDOM instead of DOMParser
 	const dom = new JSDOM( rdrview );
 	const doc = dom.window.document;
 
-	// Find all articles in the document
-	const articles = doc.querySelectorAll( "#npTL article" );
+	const fishTexts = [];
 
-	if ( !articles || articles.length === 0 ) return 0;
+	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
 
-	let allContent = "";
-
-	// Process each article
-	articles.forEach( article =>
+	const verseContainer = doc.querySelector( "#npTL > p" );
+	if ( verseContainer )
 	{
-		// Get the header text
-		const header = article.querySelector( "header" );
-		if ( header )
-		{
-			allContent += `\n📝 ${header.textContent.trim()}\n\n`;
-		}
+		const htmlContent = verseContainer.innerHTML;
+		const textContent = htmlContent
+		.replace( /<br>/gi, "\n" )
+		.replace( /<[^>]*>/g, "" );
 
-		// Get the article body
-		const body = article.querySelector( "[itemprop='articleBody']" );
-		if ( body )
-		{
-			allContent += `${body.textContent.trim() }\n\n`;
-		}
+		const lines = textContent.split( "\n" );
+		let formattedText = "";
 
-		// Get the references section (after the hr)
-		const hr = article.querySelector( "hr" );
-		if ( hr )
+		if ( lines.length > 0 )
 		{
-			allContent += "\n🔖 ارجاعات\n\n";
-			const references = hr.parentNode.querySelectorAll( "p" );
-			references.forEach( ref =>
+			formattedText += `${markdownCodes.bold}${lines[0].trim()}${markdownCodes.bold}\n`;
+			if ( lines.length > 1 )
 			{
-				allContent += `${ref.textContent.trim() }\n\n`;
-			});
+				formattedText += lines.slice( 1 ).join( "\n" ).trim();
+			}
 		}
-	});
 
-	return Math.ceil( allContent.length / messageLength );
+	}
+
+	const articles = doc.querySelectorAll( "#npTL article" );
+	if ( articles && articles.length > 0 )
+	{
+		let allContent = "";
+
+		articles.forEach( article =>
+		{
+			let articleText = "";
+
+			const header = article.querySelector( "header" );
+			if ( header )
+			{
+				articleText += `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
+			}
+
+			const body = article.querySelector( "[itemprop='articleBody']" );
+			let bodyText = "";
+			let dateText = "";
+
+			if ( body )
+			{
+				bodyText = body.textContent.trim();
+				const dateMatch = bodyText.match( /(\d{4}\/\d{2}\/\d{2})/ );
+				if ( dateMatch )
+				{
+					dateText = `📅 تاریخ: ${dateMatch[0]}`;
+					bodyText = bodyText.replace( dateMatch[0], "" );
+				}
+			}
+
+			if ( dateText ) articleText += `\n${dateText}`;
+			articleText += "\n\n";
+			if ( bodyText ) articleText += `${bodyText}\n\n`;
+
+			const hr = article.querySelector( "hr" );
+			if ( hr )
+			{
+				articleText += "\n🔖 ارجاعات\n\n";
+				const references = hr.parentNode.querySelectorAll( "p" );
+				references.forEach( ref =>
+				{
+					articleText += `${ref.textContent.trim()}\n\n`;
+				});
+			}
+
+			allContent += articleText;
+		});
+		return Math.max( 1, Math.ceil( allContent.length / messageLength ) );
+	}
+	return 1;
 }
 
-async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
+async function calculateTotalTafsirParts ( verseRefIndex )
 {
+
+	const {
+		currentSurahNumber,
+		currentAyahNumber,
+		currentSurahTitle,
+		currentSurahPersianNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
+
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 
