@@ -266,17 +266,13 @@ async function calculateTotalKhameneiParts ( verseRefIndex )
 
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
-
 	const dom = new JSDOM( rdrview );
 	const doc = dom.window.document;
 
-	let allContent = "";
+	const fishTexts = [];
 
-	// Header text
 	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
-	allContent += `${headerText}\n\n`;
 
-	// Verse text
 	const verseContainer = doc.querySelector( "#npTL > p" );
 	if ( verseContainer )
 	{
@@ -284,6 +280,7 @@ async function calculateTotalKhameneiParts ( verseRefIndex )
 		const textContent = htmlContent
 		.replace( /<br>/gi, "\n" )
 		.replace( /<[^>]*>/g, "" );
+
 		const lines = textContent.split( "\n" );
 		let formattedText = "";
 
@@ -296,60 +293,59 @@ async function calculateTotalKhameneiParts ( verseRefIndex )
 			}
 		}
 
-		allContent += `📜 ${formattedText}\n\n`;
 	}
 
-	// Articles
 	const articles = doc.querySelectorAll( "#npTL article" );
-	articles.forEach( article =>
+	if ( articles && articles.length > 0 )
 	{
-		let articleText = "";
+		let allContent = "";
 
-		const header = article.querySelector( "header" );
-		if ( header )
+		articles.forEach( article =>
 		{
-			articleText += `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
-		}
+			let articleText = "";
 
-		const body = article.querySelector( "[itemprop='articleBody']" );
-		let bodyText = "";
-		let dateText = "";
-
-		if ( body )
-		{
-			bodyText = body.textContent.trim();
-			const dateMatch = bodyText.match( /(\d{4}\/\d{2}\/\d{2})/ );
-			if ( dateMatch )
+			const header = article.querySelector( "header" );
+			if ( header )
 			{
-				dateText = `📅 تاریخ: ${dateMatch[0]}`;
-				bodyText = bodyText.replace( dateMatch[0], "" );
+				articleText += `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
 			}
-		}
 
-		if ( dateText ) articleText += `\n${dateText}`;
-		articleText += "\n\n";
-		if ( bodyText ) articleText += `${bodyText}\n\n`;
+			const body = article.querySelector( "[itemprop='articleBody']" );
+			let bodyText = "";
+			let dateText = "";
 
-		const hr = article.querySelector( "hr" );
-		if ( hr )
-		{
-			articleText += "\n🔖 ارجاعات\n\n";
-			const references = hr.parentNode.querySelectorAll( "p" );
-			references.forEach( ref =>
+			if ( body )
 			{
-				articleText += `${ref.textContent.trim()}\n\n`;
-			});
-		}
+				bodyText = body.textContent.trim();
+				const dateMatch = bodyText.match( /(\d{4}\/\d{2}\/\d{2})/ );
+				if ( dateMatch )
+				{
+					dateText = `📅 تاریخ: ${dateMatch[0]}`;
+					bodyText = bodyText.replace( dateMatch[0], "" );
+				}
+			}
 
-		allContent += articleText;
-	});
+			if ( dateText ) articleText += `\n${dateText}`;
+			articleText += "\n\n";
+			if ( bodyText ) articleText += `${bodyText}\n\n`;
 
-	// Final part count calculation
-	const contentLength = allContent.trim().length;
-	if ( contentLength === 0 ) return 1;
+			const hr = article.querySelector( "hr" );
+			if ( hr )
+			{
+				articleText += "\n🔖 ارجاعات\n\n";
+				const references = hr.parentNode.querySelectorAll( "p" );
+				references.forEach( ref =>
+				{
+					articleText += `${ref.textContent.trim()}\n\n`;
+				});
+			}
 
-	const totalParts = Math.ceil( contentLength / messageLength );
-	return Math.max( 1, totalParts );
+			allContent += articleText;
+		});
+
+		const chunkCount = Math.ceil( allContent.length / messageLength );
+	}
+	return Math.max( 1, chunkCount );
 }
 
 async function calculateTotalTafsirParts ( verseRefIndex )
