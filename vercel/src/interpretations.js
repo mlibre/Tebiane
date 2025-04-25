@@ -254,32 +254,62 @@ async function generateKhameneiMessage ( verseRefIndex, part )
 	return fishTexts.join( "\n\n" );
 }
 
-async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumber )
+
+async function calculateTotalKhameneiParts ( verseRefIndex )
 {
+	const {
+		currentSurahNumber,
+		currentAyahNumber,
+		currentSurahTitle,
+		currentSurahPersianNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
+
 	const url = `https://farsi.khamenei.ir/newspart-index?sid=${currentSurahNumber}&npt=7&aya=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 
-	// Use JSDOM instead of DOMParser
 	const dom = new JSDOM( rdrview );
 	const doc = dom.window.document;
 
-	// Find all articles in the document
-	const articles = doc.querySelectorAll( "#npTL article" );
-
-	if ( !articles || articles.length === 0 ) return 1; // Return 1 to show "no content found" message
-
-	// We need to simulate exactly how the content is processed in generateKhameneiMessage
 	let allContent = "";
 
-	// Process each article exactly as in generateKhameneiMessage
+	// Header text
+	const headerText = `> ${currentSurahTitle} 🕊️ فیش های رهبری 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}`;
+	allContent += `${headerText}\n\n`;
+
+	// Verse text
+	const verseContainer = doc.querySelector( "#npTL > p" );
+	if ( verseContainer )
+	{
+		const htmlContent = verseContainer.innerHTML;
+		const textContent = htmlContent
+		.replace( /<br>/gi, "\n" )
+		.replace( /<[^>]*>/g, "" );
+		const lines = textContent.split( "\n" );
+		let formattedText = "";
+
+		if ( lines.length > 0 )
+		{
+			formattedText += `${markdownCodes.bold}${lines[0].trim()}${markdownCodes.bold}\n`;
+			if ( lines.length > 1 )
+			{
+				formattedText += lines.slice( 1 ).join( "\n" ).trim();
+			}
+		}
+
+		allContent += `📜 ${formattedText}\n\n`;
+	}
+
+	// Articles
+	const articles = doc.querySelectorAll( "#npTL article" );
 	articles.forEach( article =>
 	{
-		const header = article.querySelector( "header" );
-		let headerText = "";
+		let articleText = "";
 
+		const header = article.querySelector( "header" );
 		if ( header )
 		{
-			headerText = `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
+			articleText += `\n📝 ${markdownCodes.bold}${header.textContent.trim()}${markdownCodes.bold}`;
 		}
 
 		const body = article.querySelector( "[itemprop='articleBody']" );
@@ -297,57 +327,43 @@ async function calculateTotalKhameneiParts ( currentSurahNumber, currentAyahNumb
 			}
 		}
 
-		allContent += headerText;
-		if ( dateText )
-		{
-			allContent += `\n${dateText}`;
-		}
-		allContent += "\n\n";
-
-		if ( bodyText )
-		{
-			allContent += `${bodyText}\n\n`;
-		}
+		if ( dateText ) articleText += `\n${dateText}`;
+		articleText += "\n\n";
+		if ( bodyText ) articleText += `${bodyText}\n\n`;
 
 		const hr = article.querySelector( "hr" );
 		if ( hr )
 		{
-			allContent += "\n🔖 ارجاعات\n\n";
+			articleText += "\n🔖 ارجاعات\n\n";
 			const references = hr.parentNode.querySelectorAll( "p" );
 			references.forEach( ref =>
 			{
-				allContent += `${ref.textContent.trim()}\n\n`;
+				articleText += `${ref.textContent.trim()}\n\n`;
 			});
 		}
+
+		allContent += articleText;
 	});
 
-	// Now determine how many actual parts we need
-	let actualParts = 0;
-	const contentLength = allContent.length;
-
-	// If there's no content, return 1 part
+	// Final part count calculation
+	const contentLength = allContent.trim().length;
 	if ( contentLength === 0 ) return 1;
 
-	// Check each potential part to see if it contains meaningful content
-	for ( let part = 0; part < Math.ceil( contentLength / messageLength ); part++ )
-	{
-		const startPos = part * messageLength;
-		const endPos = ( part + 1 ) * messageLength;
-		const partText = allContent.substring( startPos, endPos ).trim();
-
-		if ( partText.length > 0 )
-		{
-			actualParts++;
-		}
-	}
-
-	// Ensure we return at least 1 part
-	return Math.max( 1, actualParts );
+	const totalParts = Math.ceil( contentLength / messageLength );
+	return Math.max( 1, totalParts );
 }
 
-
-async function calculateTotalTafsirParts ( currentSurahNumber, currentAyahNumber )
+async function calculateTotalTafsirParts ( verseRefIndex )
 {
+
+	const {
+		currentSurahNumber,
+		currentAyahNumber,
+		currentSurahTitle,
+		currentSurahPersianNumber,
+		currentAyahPersianNumber
+	} = extractInfoByRefIndex( verseRefIndex );
+
 	const url = `https://quran.makarem.ir/fa/interpretation?sura=${currentSurahNumber}&verse=${currentAyahNumber}`;
 	const rdrview = await getReadabilityOutput( url );
 
