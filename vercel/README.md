@@ -8,6 +8,7 @@
 # name: TEBIANE-KV
 
 npm i -g vercel
+vercel login
 
 nano .env
 BOT_TOKEN=TOKEN
