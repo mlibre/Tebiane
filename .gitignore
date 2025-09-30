@@ -8,7 +8,6 @@ package-lock.json
 /.cloud
 .wrangler/
 wrangler.jsonc
-.vercel
 /build
 /dist
 /public
