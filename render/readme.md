@@ -18,4 +18,5 @@
 
  ```bash
  curl "https://tebiane.onrender.com/register_webhook"
+ # curl "https://tebiane.onrender.com/unregister_webhook"
  ```
