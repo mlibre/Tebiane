@@ -3,6 +3,7 @@ const { generateMessage } = require( "./message-generator.js" );
 const { actionCodes, appUrl, webhookPath, token, sourcesText } = require( "./config.js" );
 const { genButtons } = require( "./button-generator.js" );
 const { handleCallback } = require( "./callback.js" );
+const { normalizeMessage } = require( "./text-helpers.js" );
 
 class TelegramClient
 {
@@ -108,7 +109,7 @@ class TelegramClient
 			{
 				const message = `دستیار شخصی قرآن، ارائه دهنده ترجمه‌ها، تفسیرها (تفسیر نمونه، فیش‌های رهبری) و شأن نزول.
 جستجو بر اساس متن، ترجمه، شماره سوره یا آیه 🌟. برای شروع هر عبارتی میخواید بنویسید.`
-				await this.sendMessageWithRetry( chatId, message, { parse_mode: "MarkdownV2" });
+				await this.sendMessageWithRetry( chatId, normalizeMessage( message ), { parse_mode: "MarkdownV2" });
 				return;
 			}
 			await this.search( text, chatId, update.message.message_id );

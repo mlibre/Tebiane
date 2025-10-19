@@ -48,11 +48,3 @@ exports.editMessageWithRetry = async ( bot, message, options ) =>
 		options
 	)
 }
-
-exports.editMessageReplyMarkupWithRetry = async ( bot, replyMarkup, options ) =>
-{
-	await withRetry(
-		( opts ) => { return bot.editMessageReplyMarkup( replyMarkup, opts ) },
-		options
-	)
-}
