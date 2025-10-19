@@ -104,7 +104,13 @@ class TelegramClient
 				await this.sendAllResources( chatId );
 				return;
 			}
-
+			if ( text.startsWith( "/start" ) )
+			{
+				const message = `دستیار شخصی قرآن، ارائه دهنده ترجمه‌ها، تفسیرها (تفسیر نمونه، فیش‌های رهبری) و شأن نزول.
+جستجو بر اساس متن، ترجمه، شماره سوره یا آیه 🌟. برای شروع هر عبارتی میخواید بنویسید.`
+				await this.sendMessageWithRetry( chatId, text, { parse_mode: "MarkdownV2" });
+				return;
+			}
 			await this.search( text, chatId, update.message.message_id );
 			return;
 		}
