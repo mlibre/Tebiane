@@ -90,21 +90,6 @@ class TelegramClient
 		}, options );
 	}
 
-	async editMessageReplyMarkupWithRetry ( replyMarkup, options = {})
-	{
-		if ( !options.chat_id || !options.message_id )
-		{
-			throw new Error( "chat_id and message_id are required for editMessageReplyMarkup" );
-		}
-
-		return await this.withRetry( () =>
-		{
-			return this.makeRequest( "editMessageReplyMarkup", {
-				reply_markup: replyMarkup,
-				...options,
-			});
-		}, options );
-	}
 
 	async handleUpdate ( update )
 	{
@@ -113,12 +98,6 @@ class TelegramClient
 		{
 			const { text } = update.message;
 			const chatId = update.message.chat.id;
-
-			if ( text.startsWith( "/search" ) )
-			{
-				await this.search( text, chatId, update.message.message_id );
-				return;
-			}
 
 			if ( text.startsWith( "/resources" ) )
 			{
@@ -200,12 +179,12 @@ class TelegramClient
 	async search ( text, chatId, messageId )
 	{
 		const userInput = text.replace( /^\/search\s*/, "" );
-		const fieldResults = this.performCombinedSearch( userInput );
+		const finalResults = this.performCombinedSearch( userInput );
 
-		if ( fieldResults.length > 0 )
+		if ( finalResults.length > 0 )
 		{
-			const refIndex = fieldResults[0].id - 1; // Convert to 0-based index
-			const refResults = fieldResults.slice( 0, 8 ).map( result => { return result.id - 1 });
+			const refIndex = finalResults[0].id - 1; // Convert to 0-based index
+			const refResults = finalResults.slice( 0, 8 ).map( result => { return result.id - 1 });
 			const message = generateMessage( refIndex, actionCodes.makarem );
 
 			await this.sendMessageWithRetry( chatId, message, {
@@ -247,10 +226,11 @@ class TelegramClient
 
 	isNetworkError ( error )
 	{
-		// TODO: check with fetch
-		return error.message.includes( "socket hang up" ) ||
-      error.message.includes( "network socket disconnected" ) ||
-      error.message.includes( "fetch failed" );
+		const message = error.message?.toLowerCase();
+		return message.includes( "socket hang up" ) ||
+			message.includes( "network socket disconnected" ) ||
+			message.includes( "fetch failed" ) ||
+			message.includes( "timeout" );
 	}
 
 	async sleep ( ms )
