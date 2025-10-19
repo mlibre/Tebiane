@@ -1,4 +1,4 @@
-const { actionCodes, markdownCodes, messageLength } = require( "./config.js" );
+const { actionCodes, markdownCodes, messageLength } = require( "../configs.js" );
 const { normalizeMessage, extractInfoByRefIndex } = require( "./text-helpers.js" );
 const { getReadabilityOutput, fetchHtml } = require( "./web.js" );
 const { JSDOM } = require( "jsdom" );

@@ -39,8 +39,8 @@
 
 ### پیش‌نیازها
 
-* **Node.js:** نسخه 20 یا بالاتر ([دانلود Node.js](https://nodejs.org/)).
-* **npm** (معمولاً همراه Node.js نصب می‌شود).
+* **Node.js:** نسخه 22 یا بالاتر ([دانلود Node.js](https://nodejs.org/)).
+* **npm**
 * **Telegram Bot Token:** از طریق [BotFather](https://t.me/BotFather) در تلگرام دریافت کنید.
 
 ### کلون و نصب وابستگی‌ها
