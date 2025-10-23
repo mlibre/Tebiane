@@ -79,8 +79,10 @@ ${nextAyah.verse[translator.key]}`;
 	}
 
 	let message = `> ${currentSurahTitle} 🕊️ ${translatorWord} ${translator.farsi} 📖 ${currentSurahPersianNumber}:${currentAyahPersianNumber}\n\n${prevAyahText}
-${currentAyahText}
-${nextAyahText}`;
+	${currentAyahText}
+	${nextAyahText}`;
+	const makaremLink = `https://quran.makarem.ir/fa#${currentSurahNumber}:${currentAyahNumber}`;
+	message += `\n\n[🔗 لینک به وب سایت](${makaremLink})`;
 	return normalizeMessage( message );
 }
 
