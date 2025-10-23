@@ -1,7 +1,4 @@
 * ترجمه ی مکارم شیراری - fa.makarem.json: https://api.globalquran.com/complete/fa.makarem.json
-* ترجمه انصاریان - fa.ansarian.json: https://api.globalquran.com/complete/fa.ansarian.json
-* ترجمه فولادوند - fa.fooladvand.json: https://api.globalquran.com/complete/fa.fooladvand.json
-* ترجمه ی مجتبوی - fa.mojtabavi.json: https://api.globalquran.com/complete/fa.mojtabavi.json
 * ترجمه اربری - en.arberry.json: https://api.globalquran.com/complete/en.arberry.json
 * متن عربی ساده - ar-simple-clean.json: https://api.globalquran.com/complete/ar-simple-clean.json
 * متن عربی با عراب - ar-simple-enhanced.json: https://api.globalquran.com/complete/ar-simple-enhanced.json

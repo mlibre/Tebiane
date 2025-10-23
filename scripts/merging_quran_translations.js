@@ -1,8 +1,5 @@
 const fs = require( "fs" );
 const json1 = require( "../sources/fa.makarem.json" );
-const json2 = require( "../sources/fa.ansarian.json" );
-const json3 = require( "../sources/fa.fooladvand.json" );
-const json4 = require( "../sources/fa.mojtabavi.json" );
 const json5 = require( "../sources/en.arberry.json" );
 const json6 = require( "../sources/ar-simple-clean.json" );
 const json7 = require( "../sources/ar-simple-enhanced.json" );
@@ -70,5 +67,5 @@ function mergeVersesToArray ( ...jsons )
 	return merged;
 }
 
-const mergedJsonArray = mergeVersesToArray( json1, json2, json3, json4, json5, json6, json7 );
+const mergedJsonArray = mergeVersesToArray( json1, json5, json6, json7 );
 fs.writeFileSync( "./quran.json", JSON.stringify( mergedJsonArray, null, 2 ) );
