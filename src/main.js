@@ -17,9 +17,6 @@ const fuseKeys = [
 	{ name: "ayah", weight: 1.2 }, // 1
 	{ name: "ayah_persian", weight: 1.2 }, // ۱
 	{ name: "verse.farsi_makarem", weight: 1 },
-	{ name: "verse.farsi_ansarian", weight: 1 },
-	{ name: "verse.farsi_fooladvand", weight: 1 },
-	{ name: "verse.farsi_mojtabavi", weight: 1 },
 	{ name: "verse.arabic_clean", weight: 1 }, // بسم الله الرحمن الرحيم
 	{ name: "verse.arabic_enhanced", weight: 1 }, // بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
 	{ name: "id", weight: 0.05 }, // 1
@@ -97,9 +94,6 @@ bot.on( "callback_query", async ( callbackQuery ) =>
 //     "ayah_persian": "۱",
 //     "verse": {
 //       "farsi_makarem": "به نام خداوند بخشنده بخشایشگر",
-//       "farsi_ansarian": "به نام خدا که رحمتش بی‌اندازه است و مهربانی‌اش همیشگی.",
-//       "farsi_fooladvand": "به نام خداوند رحمتگر مهربان",
-//       "farsi_mojtabavi": "به نام خداى بخشاينده مهربان",
 //       "english_arberry": "In the Name of God, the Merciful, the Compassionate",
 //       "arabic_clean": "بسم الله الرحمن الرحيم",
 //       "arabic_enhanced": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"

@@ -24,9 +24,6 @@ const searchDocument = new FlexSearch.Document({
 			"ayah_persian",
 			"surah:farsi",
 			"verse:farsi_makarem",
-			"verse:farsi_ansarian",
-			"verse:farsi_fooladvand",
-			"verse:farsi_mojtabavi",
 			"verse:arabic_enhanced"
 		]
 	},

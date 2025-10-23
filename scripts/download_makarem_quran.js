@@ -217,10 +217,14 @@ async function main ()
 
 			const newVerseObject = {
 				id: verseObj.id,
+				id_persian: verseObj.id_persian,
 				surah: verseObj.surah,
 				ayah: verseObj.ayah,
+				ayah_persian: verseObj.ayah_persian,
 				verse: {
 					arabic_enhanced: scrapedData.arabic_enhanced,
+					arabic_clean: verseObj.verse?.arabic_clean || "",
+					english_arberry: verseObj.verse?.english_arberry || "",
 					farsi_makarem: scrapedData.farsi_makarem,
 				}
 			};

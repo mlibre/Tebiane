@@ -26,9 +26,6 @@ exports.markdownCodes = {
 const actionCodes = {
 	nextResult: "a",
 	prevResult: "b",
-	ansarian: "c",
-	fooladvand: "d",
-	mojtabavi: "e",
 	makarem: "f",
 	arabicText: "g",
 	arabicIrabText: "h",
@@ -45,18 +42,6 @@ const actionCodes = {
 };
 
 const perian_translations = {
-	[actionCodes.ansarian]: {
-		farsi: "انصاریان",
-		key: "farsi_ansarian"
-	},
-	[actionCodes.fooladvand]: {
-		farsi: "فولادوند",
-		key: "farsi_fooladvand"
-	},
-	[actionCodes.mojtabavi]: {
-		farsi: "مجتبوی",
-		key: "farsi_mojtabavi"
-	},
 	[actionCodes.makarem]: {
 		farsi: "مکارم",
 		key: "farsi_makarem"
