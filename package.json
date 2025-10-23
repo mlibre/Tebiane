@@ -1,6 +1,6 @@
 {
   "name": "tebiane",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Simple telegram bot to fuzzy search in the Quran and some of the Persian translations, Also includes interpretations and saan nozul",
   "main": "index.js",
   "scripts": {
