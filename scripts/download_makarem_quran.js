@@ -17,15 +17,15 @@ const VERSE_LIMIT = 0; // Set to 0 to run all verses
 async function scrapeVerse ( page, surah, ayah )
 {
 	const url = `${BASE_URL}#${surah}:${ayah}`;
-	const retries = 5;
+	const retries = 3;
 
 	for ( let i = 0; i < retries; i++ )
 	{
 		try
 		{
-			await page.goto( url, { waitUntil: "load", timeout: 70000 });
+			await page.goto( url, { waitUntil: "load", timeout: 90000 });
 			const verseSelector = `div.verse[data-surah="${surah}"][data-verse="${ayah}"]`;
-			await page.waitForSelector( verseSelector, { timeout: 60000 });
+			await page.waitForSelector( verseSelector, { timeout: 90000 });
 
 			const scrapedData = await page.evaluate( ( selector ) =>
 			{
