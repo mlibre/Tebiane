@@ -1,5 +1,4 @@
 const fs = require( "fs" );
-const json1 = require( "../sources/fa.makarem.json" );
 const json5 = require( "../sources/en.arberry.json" );
 const json6 = require( "../sources/ar-simple-clean.json" );
 const json7 = require( "../sources/ar-simple-enhanced.json" );
