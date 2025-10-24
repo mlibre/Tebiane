@@ -19,9 +19,9 @@ async function scrapeVerse ( page, surah, ayah )
 	const url = `${BASE_URL}#${surah}:${ayah}`;
 	try
 	{
-		await page.goto( url, { waitUntil: "load", timeout: 10000 });
+		await page.goto( url, { waitUntil: "load", timeout: 30000 });
 		const verseSelector = `div.verse[data-surah="${surah}"][data-verse="${ayah}"]`;
-		await page.waitForSelector( verseSelector, { timeout: 10000 });
+		await page.waitForSelector( verseSelector, { timeout: 30000 });
 
 		const scrapedData = await page.evaluate( ( selector ) =>
 		{
