@@ -17,49 +17,40 @@ const VERSE_LIMIT = 0; // Set to 0 to run all verses
 async function scrapeVerse ( page, surah, ayah )
 {
 	const url = `${BASE_URL}#${surah}:${ayah}`;
-	const retries = 3;
-
-	for ( let i = 0; i < retries; i++ )
+	try
 	{
-		try
-		{
-			await page.goto( url, { waitUntil: "load", timeout: 90000 });
-			const verseSelector = `div.verse[data-surah="${surah}"][data-verse="${ayah}"]`;
-			await page.waitForSelector( verseSelector, { timeout: 90000 });
+		await page.goto( url, { waitUntil: "load", timeout: 20000 });
+		const verseSelector = `div.verse[data-surah="${surah}"][data-verse="${ayah}"]`;
+		await page.waitForSelector( verseSelector, { timeout: 30000 });
 
-			const scrapedData = await page.evaluate( ( selector ) =>
-			{
-				const verseElement = document.querySelector( selector );
-				if ( !verseElement ) return null;
-				const arabicEl = verseElement.querySelector( "p.verse-text" );
-				const farsiEl = verseElement.querySelector( "p.translate-text[data-lang=\"fa\"]" );
-				if ( !arabicEl || !farsiEl ) return null;
-				const arabicNodeClone = arabicEl.cloneNode( true );
-				const verseNumberSpan = arabicNodeClone.querySelector( "span.verse-number" );
-				if ( verseNumberSpan ) verseNumberSpan.remove();
-				return {
-					arabic_enhanced: arabicNodeClone.textContent.trim(),
-					farsi_makarem: farsiEl.textContent.trim(),
-				};
-			}, verseSelector );
-
-			if ( scrapedData )
-			{
-				return scrapedData;
-			}
-		}
-		catch ( error )
+		const scrapedData = await page.evaluate( ( selector ) =>
 		{
-			console.log( chalk.yellow( `\n[Attempt ${i + 1}/${retries}] Error scraping ${surah}:${ayah}. Retrying...` ) );
-			console.log( chalk.gray( `  > ${error.message}` ) );
-			if ( i < retries - 1 )
-			{
-				await new Promise( res => { return setTimeout( res, 2000 ) });
-			}
+			const verseElement = document.querySelector( selector );
+			if ( !verseElement ) return null;
+			const arabicEl = verseElement.querySelector( "p.verse-text" );
+			const farsiEl = verseElement.querySelector( "p.translate-text[data-lang=\"fa\"]" );
+			if ( !arabicEl || !farsiEl ) return null;
+			const arabicNodeClone = arabicEl.cloneNode( true );
+			const verseNumberSpan = arabicNodeClone.querySelector( "span.verse-number" );
+			if ( verseNumberSpan ) verseNumberSpan.remove();
+			return {
+				arabic_enhanced: arabicNodeClone.textContent.trim(),
+				farsi_makarem: farsiEl.textContent.trim(),
+			};
+		}, verseSelector );
+
+		if ( scrapedData )
+		{
+			return scrapedData;
 		}
 	}
+	catch ( error )
+	{
+		console.log( chalk.yellow( `\nError scraping ${surah}:${ayah}. Retrying...` ) );
+		console.log( chalk.gray( `  > ${error.message}` ) );
+	}
 
-	console.log( chalk.red( `\n[!] Failed to scrape ${surah}:${ayah} after ${retries} attempts.` ) );
+	console.log( chalk.red( `\n[!] Failed to scrape ${surah}:${ayah}` ) );
 	return null;
 }
 
@@ -198,7 +189,7 @@ async function main ()
 
 			process.stdout.write( chalk.gray( `[${i + 1}/${totalVerses}] Checking ${surahNum}:${ayahNum}... ` ) );
 
-			if ( surahNum === undefined || ayahNum === undefined )
+			if ( !surahNum || !ayahNum )
 			{
 				validationErrors.push({ type: "MissingData", id: verseObj.id, message: "Verse object is missing surah/ayah number." });
 				process.stdout.write( chalk.red( "Missing local data\n" ) );
@@ -211,8 +202,9 @@ async function main ()
 			{
 				validationErrors.push({ type: "ScrapeError", location: `${surahNum}:${ayahNum}`, message: "Could not retrieve data from the website after multiple retries." });
 				process.stdout.write( chalk.red( "FATAL SCRAPE FAILED\n" ) );
-				console.error( chalk.bold.red( `\n[!!!] Aborting process due to persistent failure at ${surahNum}:${ayahNum}.` ) );
-				return; // Exit the main function
+				const errorMessage = `Aborting process due to persistent failure at ${surahNum}:${ayahNum}.`;
+				console.error( chalk.bold.red( `\n[!!!] ${errorMessage}` ) );
+				throw new Error( errorMessage );
 			}
 
 			const newVerseObject = {
@@ -290,4 +282,39 @@ async function main ()
 	}
 }
 
-main();
+async function runWithRetries ()
+{
+	const maxRetries = 50;
+	let lastError = null;
+
+	for ( let i = 1; i <= maxRetries; i++ )
+	{
+		try
+		{
+			console.log( chalk.cyan.bold( `\n--- Starting attempt ${i}/${maxRetries} ---` ) );
+			await main();
+			console.log( chalk.green.bold( "\n[SUCCESS] Script completed successfully!" ) );
+			return; // Exit the function on success
+		}
+		catch ( error )
+		{
+			lastError = error;
+			console.error( chalk.red.bold( `\n[!!!] Attempt ${i}/${maxRetries} failed.` ) );
+			console.error( chalk.red( `  > ${error.message}` ) );
+			if ( i < maxRetries )
+			{
+				console.log( chalk.yellow( "[*] Retrying in 5 seconds..." ) );
+				await new Promise( res => { return setTimeout( res, 5000 ) });
+			}
+		}
+	}
+
+	console.error( chalk.red.bold( `\n[!!!] Script failed after ${maxRetries} attempts.` ) );
+	if ( lastError )
+	{
+		console.error( chalk.gray( lastError.stack ) );
+	}
+	process.exit( 1 ); // Exit with a failure code
+}
+
+runWithRetries();
