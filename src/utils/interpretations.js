@@ -28,7 +28,7 @@ async function generateSaanNuzulMessage ( verseRefIndex )
 
 	// Find the nuzul section
 	const headers = Array.from( doc.querySelectorAll( ".mw-parser-output h2" ) );
-	const nuzulHeader = headers.find( h => { return h.textContent.trim() === "نزول" });
+	const nuzulHeader = headers.find( h => { return h.textContent.includes( "نزول" ) });
 
 	if ( nuzulHeader )
 	{
